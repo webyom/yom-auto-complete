@@ -1,0 +1,48 @@
+<%
+var hasItem = false;
+var getStdItem = $opt.getStdItem;
+var getListItemText = $opt.getListItemText;
+var selectedIdHash = {};
+var i, item, stdItem;
+if(list && list.length) {
+	if(checkbox) {
+		for(i = 0; i < selectedData.length; i++) {
+			item = selectedData[i];
+			if(!item) {
+				continue;
+			}
+			stdItem = getStdItem ? getStdItem(item, 'LIST') : item;
+			selectedIdHash[stdItem.id] = 1;
+		}
+	}
+	for(i = 0; i < list.length; i++) {
+		item = list[i];
+		if(!item) {
+			continue;
+		}
+		hasItem = true;
+		stdItem = getStdItem ? getStdItem(item, 'LIST') : item;
+%>
+		<li data-id="<%=stdItem.id%>" data-index="<%=i%>" title="<%==getListItemText ? getListItemText(item, stdItem) : stdItem.name%>" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">
+			<%if(checkbox) {%>
+				<label class="auto-complete-mockup-checkbox-label">
+					<label class="auto-complete-mockup-checkbox <%=selectedIdHash[stdItem.id] ? 'on' : ''%>"><span><i class="fa fa-check"></i></span></label><span>
+			<%}%>
+			<%if(matchedInput) {%>
+				<%=$encodeHtml((getListItemText ? getListItemText(item, stdItem) : stdItem.name).replace(new RegExp('(' + matchedInput.replace(/\\/g, '\\\\').replace(/\./g, '\\.').replace(/\*/g, '\\*') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')%>
+			<%} else {%>
+				<%==getListItemText ? getListItemText(item, stdItem) : stdItem.name%>
+			<%}%>
+			<%if(checkbox) {%>
+				</span></label>
+			<%}%>
+		</a></li>
+<%
+	}
+	if(!hasItem) {%>
+		<li class="disabled"><a><i><%=noResultMsg%></i></a></li>
+<%
+	}
+} else {%>
+	<li class="disabled"><a><i><%=noResultMsg%></i></a></li>
+<%}%>

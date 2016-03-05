@@ -1,0 +1,33 @@
+{
+  "name": "yom-auto-complete",
+  "version": "0.1.0",
+  "description": "An auto complete widget.",
+  "keywords": [
+    "form util"
+  ],
+  "homepage": "https://github.com/webyom/yom-auto-complete",
+  "author": {
+    "name": "Gary Wang",
+    "email": "webyom@gmail.com",
+    "url": "http://webyom.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webyom/yom-auto-complete.git"
+  },
+  "bugs": {
+    "url": "https://github.com/webyom/yom-auto-complete/issues"
+  },
+  "license": "MIT",
+  "typings": "src/yom-auto-complete.d.ts",
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {},
+  "dependencies": {
+  },
+  "devDependencies": {
+    "gulp": "^3.8.5",
+    "gulp-amd-bundler": "^0.2.1"
+  }
+}

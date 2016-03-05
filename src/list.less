@@ -1,0 +1,65 @@
+@import "mixins.less";
+
+label.auto-complete-mockup-checkbox-label {
+	line-height: 30px;
+	min-width: 80px;
+	max-width: 260px;
+	vertical-align: top;
+	font-weight: normal;
+	color: #333;
+	margin: 0;
+	cursor: pointer;
+	position: relative;
+	line-height: 24px;
+	padding-left: 28px;
+	label.auto-complete-mockup-checkbox {
+		position: absolute;
+		margin: 0;
+		left: 0;
+		top: 0;
+	}
+}
+label.auto-complete-mockup-checkbox {
+	width: 20px;
+	margin: 0;
+	overflow: hidden;
+	cursor: pointer;
+	input {
+		position: absolute;
+		left: -999px;
+	}
+	span {
+		display: inline-block;
+		width: 20px;
+		height: 20px;
+		line-height: 16px;
+		text-align: center;
+		border: solid 2px #888;
+		background-color: #f3f3f3;
+		.border-radius(2px);
+		i {
+			visibility: hidden;
+			font-size: 12px !important;
+			line-height: 16px !important;
+			color: #888 !important;
+		}
+	}
+	&.disabled {
+		cursor: default;
+		span {
+			border: solid 2px #ccc;
+		}
+	}
+}
+label.auto-complete-mockup-checkbox.on {
+	span {
+	}
+	i {
+		visibility: visible;
+	}
+}
+li.active {
+	label.auto-complete-mockup-checkbox-label {
+		color: #fff;
+	}
+}

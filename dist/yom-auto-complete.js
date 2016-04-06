@@ -346,7 +346,7 @@ $.extend(YomAutoComplete.prototype, {
 		var lastRichItem = $('.auto-complete-rich-item:last', this._richBox)[0];
 		var itemOffset, boxOffset, left, top, textRange, val;
 		if(!this._box.data('initWidth')) {
-			this._richBox.css({maxWidth: (this._box.innerWidth() - 30) + 'px'});
+			this._richBox.css({marginRight: '30px'});
 			this._box.data('initWidth', this._box.outerWidth());
 			this._box.data('initHeight', this._box.outerHeight());
 			this._box.data('initPaddingLeft', parseInt(this._box.css('padding-left')) || 0);
@@ -361,7 +361,6 @@ $.extend(YomAutoComplete.prototype, {
 				this._box.css({
 					paddingLeft: left + 'px',
 					paddingTop: top + 'px',
-					width: this._box.data('initWidth') + 'px',
 					height: top > 16 ? (this._box.data('initHeight') + top - 4 + 'px') : (this._box.data('initHeight') + 'px')
 				});
 			} else {
@@ -376,7 +375,6 @@ $.extend(YomAutoComplete.prototype, {
 				this._box.css({
 					paddingLeft: this._box.data('initPaddingLeft') + 'px',
 					paddingTop: this._box.data('initPaddingTop') + 'px',
-					width: this._box.data('initWidth') + 'px',
 					height: this._box.data('initHeight') + 'px'
 				});
 			} else {

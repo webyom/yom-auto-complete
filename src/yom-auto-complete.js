@@ -1,6 +1,7 @@
 var $ = window.jQuery || window.$;
 var listTpl = require('./list.tpl.html');
 var richItemListTpl = require('./rich-item-list.tpl.html');
+var pinyin = require('./pinyin');
 require('./yom-auto-complete.less');
 
 var YomAutoComplete = function(box, opt) {
@@ -19,7 +20,7 @@ var YomAutoComplete = function(box, opt) {
 	this._separator = opt.separator || (this._richSelectionResult ? '' : '; ');
 	this._excludeExist = !!opt.excludeExist;
 	this._checkbox = this._maxSelection > 1 && !this._excludeExist && !this._freeInput;
-	this._dataSource = opt.dataSource;
+	this._dataSource = null;
 	this._selectedData = opt.initData || [];
 	this._getStdItem = opt.getStdItem;
 	this._listTpl = opt.listTpl || listTpl;
@@ -39,6 +40,7 @@ var YomAutoComplete = function(box, opt) {
 		keyup: function(evt) {return self._onKeyup(evt);},
 		scroll: function(evt) {return self._cancelBlurHide();}
 	};
+	this.setDataSource(opt.dataSource);
 	this._init();
 };
 
@@ -549,7 +551,15 @@ $.extend(YomAutoComplete.prototype, {
 				if(matchedList.length >= self._listMaxLength) {
 					return false;
 				}
-				if(stdItem.name.toLowerCase().indexOf(input.toLowerCase()) >= 0) {
+				var inputLowerCase = input.toLowerCase();
+				var matched = stdItem.name.toLowerCase().indexOf(inputLowerCase) >= 0;
+				if(!matched && item._pinyinFull != stdItem.name) {
+					matched = item._pinyinFull.toLowerCase().indexOf(inputLowerCase) >= 0;
+				}
+				if(!matched && item._pinyinLead != stdItem.name) {
+					matched = item._pinyinLead.toLowerCase().indexOf(inputLowerCase) >= 0;
+				}
+				if(matched) {
 					if(self._excludeExist) {
 						self._each(self._selectedData, function(j, item2, stdItem2) {
 							if(stdItem.id == stdItem2.id) {
@@ -782,8 +792,16 @@ $.extend(YomAutoComplete.prototype, {
 	},
 
 	setDataSource: function(dataSource) {
+		var getStdItem = this._getStdItem;
 		if(dataSource && dataSource.length >= 0) {
 			this._dataSource = dataSource;
+			$.each(dataSource, function(i, item) {
+				var stdItem = getStdItem ? getStdItem(item) : item;
+				if(stdItem.name) {
+					item._pinyinFull = pinyin.getFullChars(stdItem.name);
+					item._pinyinLead = pinyin.getCamelChars(stdItem.name);
+				}
+			});
 		}
 	},
 
@@ -886,5 +904,7 @@ $.extend(YomAutoComplete.prototype, {
 		this._list = null;
 	}
 });
+
+YomAutoComplete.pinyin = pinyin;
 
 module.exports = YomAutoComplete;

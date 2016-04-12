@@ -176,7 +176,7 @@ $.extend(YomAutoComplete.prototype, {
 				}, 300);
 			} else {
 				if(!(keyCode === 8 || keyCode === 46) && !this._freeInput && this._separator && new RegExp(this._getRegExpSeperator() + '\\s*$').test(boxValue)) {
-					this._syncFromDataList(true);
+					this._syncFromDataList();
 					if(!this._checkbox || !$('[data-index="' + this._currentListIndex + '"] .auto-complete-mockup-checkbox', this._list).hasClass('on')) {
 						this._selectItem(this._currentListIndex);
 					}
@@ -341,7 +341,7 @@ $.extend(YomAutoComplete.prototype, {
 		});
 	},
 
-	_fixBoxPadding: function(focus) {
+	_fixBoxPadding: function() {
 		if(!this._richBox || !this._box[0].clientWidth) {
 			return;
 		}
@@ -387,14 +387,6 @@ $.extend(YomAutoComplete.prototype, {
 				});
 			}
 		}
-		if(focus && this._box[0].createTextRange) {//IE
-			val = this._box.val();
-			this._box.val(' ');
-			textRange = this._box[0].createTextRange();
-			textRange.collapse(false);
-			textRange.select();
-			this._box.val(val);
-		}
 	},
 
 	_checkPlaceHolder: function() {
@@ -409,7 +401,7 @@ $.extend(YomAutoComplete.prototype, {
 		}
 	},
 
-	_syncFromDataList: function(focus) {
+	_syncFromDataList: function() {
 		if(this._freeInput) {
 			return;
 		}
@@ -422,7 +414,7 @@ $.extend(YomAutoComplete.prototype, {
 				getStdItem: this._getStdItem,
 				getRichItemText: this._opt.getRichItemText
 			}));
-			this._fixBoxPadding(focus);
+			this._fixBoxPadding();
 			this._checkPlaceHolder();
 		} else {
 			this._each(this._selectedData, function(i, item, stdItem) {
@@ -611,7 +603,7 @@ $.extend(YomAutoComplete.prototype, {
 						this._box.val(this._trimr() + stdItem.name + (this._maxSelection > 1 ? this._separator : ''));
 						this._syncFromBox();
 					} else {
-						this._syncFromDataList(true);
+						this._syncFromDataList();
 					}
 					if(added) {
 						checkbox.addClass('on');
@@ -626,7 +618,7 @@ $.extend(YomAutoComplete.prototype, {
 					this._box.val(this._trimr() + stdItem.name + (this._maxSelection > 1 ? this._separator : ''));
 					this._syncFromBox();
 				} else {
-					this._syncFromDataList(true);
+					this._syncFromDataList();
 				}
 				this.hideList();
 				added && onSelect && onSelect.call(this._box[0], item, stdItem, index);

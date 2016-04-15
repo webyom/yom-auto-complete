@@ -8,7 +8,7 @@ for(var i = 0, l = list.length; i < l; i++) {
 %>
 	<span data-id="<%=stdItem.id%>" class="auto-complete-rich-item">
 		<span class="text" style="max-width: <%=maxWidth%>px;" title="<%==getRichItemText ? getRichItemText(item, stdItem) : stdItem.name%>"><%==getRichItemText ? getRichItemText(item, stdItem) : stdItem.name%></span>
-		<i class="fa fa-remove icon-remove"></i>
+		<i class="icon-remove">×</i>
 	</span>
 <%
 }

@@ -1,5 +1,3 @@
-@import "mixins.less";
-
 label.auto-complete-mockup-checkbox-label {
 	line-height: 30px;
 	min-width: 80px;
@@ -29,20 +27,15 @@ label.auto-complete-mockup-checkbox {
 		left: -999px;
 	}
 	span {
+		position: relative;
 		display: inline-block;
-		width: 20px;
-		height: 20px;
-		line-height: 16px;
+		width: 18px;
+		height: 18px;
+		vertical-align: middle;
 		text-align: center;
-		border: solid 2px #888;
+		border: solid 1px #888;
 		background-color: #f3f3f3;
-		.border-radius(2px);
-		i {
-			visibility: hidden;
-			font-size: 12px !important;
-			line-height: 16px !important;
-			color: #888 !important;
-		}
+		border-radius: 2px;
 	}
 	&.disabled {
 		cursor: default;
@@ -52,10 +45,18 @@ label.auto-complete-mockup-checkbox {
 	}
 }
 label.auto-complete-mockup-checkbox.on {
-	span {
-	}
-	i {
-		visibility: visible;
+	span:before {
+		position: absolute;
+		content: "";
+		display: inline-block;
+		width: 8px;
+		height: 8px;
+		left: 50%;
+		top: 50%;
+		margin-left: -4px;
+		margin-top: -4px;
+		background-color: #888;
+		border-radius: 2px;
 	}
 }
 li.active {

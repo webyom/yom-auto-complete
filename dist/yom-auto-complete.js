@@ -56,6 +56,19 @@ $.extend(YomAutoComplete.prototype, {
 	},
 
 	_init: function() {
+		var self = this;
+		if(this._dataSource && this._opt.initData) {
+			this._selectedData = this._dataSource.filter(function(item) {
+				var stdItem = self._getStdItem ? self._getStdItem(item) : item;
+				return self._opt.initData.some(function(initItem) {
+					var stdInitItem = self._getStdItem ? self._getStdItem(initItem) : initItem;
+					if(stdInitItem.id == stdItem.id) {
+						return true;
+					}
+					return false;
+				});
+			});
+		}
 		this._box.parent().css('position') == 'static' && this._box.parent().css('position', 'relative');
 		if(this._richSelectionResult) {
 			this._richBox = this._insertNode($('<div data-type="auto-complete-rich-box" class="clearfix"></div>').css($.extend({position: 'absolute', left: '0', top: '0'}, this._opt.richBoxStyle)));

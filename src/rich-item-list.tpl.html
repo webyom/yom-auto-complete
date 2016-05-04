@@ -4,7 +4,7 @@ var getStdItem = $opt.getStdItem;
 var getRichItemText = $opt.getRichItemText;
 for(var i = 0, l = list.length; i < l; i++) {
 	var item = list[i];
-	var stdItem = getStdItem ? getStdItem(item, 'RICH_BOX') : item;
+	var stdItem = getStdItem(item, 'RICH_BOX');
 %>
 	<span data-id="<%=stdItem.id%>" class="auto-complete-rich-item">
 		<span class="text" style="max-width: <%=maxWidth%>px;" title="<%==getRichItemText ? getRichItemText(item, stdItem) : stdItem.name%>"><%==getRichItemText ? getRichItemText(item, stdItem) : stdItem.name%></span>

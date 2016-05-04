@@ -22,7 +22,6 @@ var YomAutoComplete = function(box, opt) {
 	this._checkbox = this._maxSelection > 1 && !this._excludeExist && !this._freeInput;
 	this._dataSource = null;
 	this._selectedData = opt.initData || [];
-	this._getStdItem = opt.getStdItem;
 	this._listTpl = opt.listTpl || listTpl;
 	this._listTplData = opt.listTplData || {};
 	this._previousListData = null;
@@ -123,8 +122,7 @@ $.extend(YomAutoComplete.prototype, {
 			var removeId = $('.active', this._richBox).data('id');
 			if(removeId) {
 				var rmItems = this.removeSelectedItem(removeId);
-				var getStdItem = this._getStdItem;
-				var rmStdItems = getStdItem ? getStdItem(rmItems) : rmItems;
+				var rmStdItems = this._getStdItem(rmItems);
 				var onRemove = this._opt.onRemove;
 				if(this._checkbox) {
 					$('[data-id="' + removeId + '"] .auto-complete-mockup-checkbox', this._list).removeClass('on');
@@ -231,8 +229,7 @@ $.extend(YomAutoComplete.prototype, {
 					} else {
 						self.hideList();
 					}
-					var getStdItem = self._getStdItem;
-					var rmStdItems = getStdItem ? getStdItem(rmItems) : rmItems;
+					var rmStdItems = self._getStdItem(rmItems);
 					var onRemove = self._opt.onRemove;
 					onRemove && onRemove.call(self._box[0], rmItems, rmStdItems);
 				}, 0);
@@ -270,6 +267,25 @@ $.extend(YomAutoComplete.prototype, {
 					self.hideList();
 				}
 			});
+		}
+	},
+	
+	_getStdItem(item) {
+		if(item == undefined) {
+			return item;
+		} if(this._opt.getStdItem) {
+			return this._opt.getStdItem(item);
+		} else {
+			if(typeof item == 'string') {
+				return {
+					id: item,
+					name: item
+				};
+			} else {
+				item.id = item.id || item.name;
+				item.name = item.name || item.id;
+				return item;
+			}
 		}
 	},
 
@@ -330,12 +346,12 @@ $.extend(YomAutoComplete.prototype, {
 	},
 
 	_each: function(dataList, callback) {
-		var getStdItem = this._getStdItem;
+		var self = this;
 		$.each(dataList, function(i, item) {
 			if(!item) {
 				return true;
 			}
-			var stdItem = getStdItem ? getStdItem(item) : item;
+			var stdItem = self._getStdItem(item);
 			return callback(i, item, stdItem);
 		});
 	},
@@ -410,7 +426,7 @@ $.extend(YomAutoComplete.prototype, {
 				list: this._selectedData,
 				maxWidth: this._box.innerWidth() - 40
 			}, {
-				getStdItem: this._getStdItem,
+				getStdItem: this._getStdItem.bind(this),
 				getRichItemText: this._opt.getRichItemText
 			}));
 			this._fixBoxPadding();
@@ -470,15 +486,14 @@ $.extend(YomAutoComplete.prototype, {
 		if(this._freeInput) {
 			return true;
 		}
-		var getStdItem = this._getStdItem;
-		var aStdItem = getStdItem ? getStdItem(aItem) : aItem;
+		var aStdItem = this._getStdItem(aItem);
 		var item, stdItem;
 		var hasSame = false;
 		var onRemove = this._opt.onRemove;
 		if(this._selectedData.length >= this._maxSelection) {
 			if(this._maxSelection === 1) {
 				item = this._selectedData[0];
-				stdItem = getStdItem ? getStdItem(item) : item;
+				stdItem = this._getStdItem(item);
 				if(aStdItem.id == stdItem.id) {
 					return false;
 				} else {
@@ -535,9 +550,7 @@ $.extend(YomAutoComplete.prototype, {
 	_getMatchedList: function(input, callback) {
 		var self = this;
 		var matchedList = [];
-		if(this._opt.getMatchedList) {
-			this._opt.getMatchedList(input, callback);
-		} else if(this._dataSource) {
+		if(this._dataSource) {
 			this._each(this._dataSource, function(i, item, stdItem) {
 				var hasSame = false;
 				if(matchedList.length >= self._listMaxLength) {
@@ -567,12 +580,16 @@ $.extend(YomAutoComplete.prototype, {
 					}
 				}
 			});
-			if(callback) {
+			if(this._opt.getMatchedList) {
+				this._opt.getMatchedList(input, callback, matchedList);
+			} else if(callback) {
 				callback(matchedList, input);
 			} else {
 				this.renderList(matchedList, {matchedInput: input});
 			}
-		}
+		} else if(this._opt.getMatchedList) {
+			this._opt.getMatchedList(input, callback);
+		} 
 	},
 
 	_selectItem: function(index) {
@@ -585,7 +602,7 @@ $.extend(YomAutoComplete.prototype, {
 			return;
 		}
 		item = this._currentListData[index];
-		stdItem = this._getStdItem ? this._getStdItem(item) : item;
+		stdItem = this._getStdItem(item);
 		if(this._checkbox) {
 			checkbox = $('[data-index="' + index + '"] .auto-complete-mockup-checkbox', this._list);
 		}
@@ -682,7 +699,7 @@ $.extend(YomAutoComplete.prototype, {
 					checkbox: this._checkbox,
 					selectedData: this._selectedData
 				}), {
-					getStdItem: this._getStdItem,
+					getStdItem: this._getStdItem.bind(this),
 					getListItemText: this._opt.getListItemText
 				}));
 				if(this._list.height() > this._listMaxHeight) {
@@ -782,9 +799,9 @@ $.extend(YomAutoComplete.prototype, {
 		var self = this;
 		if(this._dataSource && dataList) {
 			this._selectedData = this._dataSource.filter(function(item) {
-				var stdItem = self._getStdItem ? self._getStdItem(item) : item;
+				var stdItem = self._getStdItem(item);
 				return dataList.some(function(initItem) {
-					var stdInitItem = self._getStdItem ? self._getStdItem(initItem) : initItem;
+					var stdInitItem = self._getStdItem(initItem);
 					if(stdInitItem.id == stdItem.id) {
 						return true;
 					}
@@ -798,15 +815,16 @@ $.extend(YomAutoComplete.prototype, {
 	},
 
 	setDataSource: function(dataSource) {
-		var getStdItem = this._getStdItem;
+		var self = this;
 		if(dataSource && dataSource.length >= 0) {
-			this._dataSource = dataSource;
+			this._dataSource = dataSource = dataSource.concat();
 			$.each(dataSource, function(i, item) {
-				var stdItem = getStdItem ? getStdItem(item) : item;
+				var stdItem = self._getStdItem(item);
 				if(stdItem.name) {
-					item._pinyinFull = pinyin.getFullChars(stdItem.name);
-					item._pinyinLead = pinyin.getCamelChars(stdItem.name);
+					stdItem._pinyinFull = pinyin.getFullChars(stdItem.name);
+					stdItem._pinyinLead = pinyin.getCamelChars(stdItem.name);
 				}
+				dataSource[i] = stdItem;
 			});
 		}
 	},
@@ -829,8 +847,7 @@ $.extend(YomAutoComplete.prototype, {
 		}
 		var res;
 		var validItem = false;
-		var getStdItem = this._getStdItem;
-		var aStdItem = getStdItem ? getStdItem(aItem) : aItem;
+		var aStdItem = this._getStdItem(aItem);
 		if(this._dataSource) {
 			this._each(this._dataSource, function(i, item, stdItem) {
 				if(aStdItem.id == stdItem.id) {
@@ -864,11 +881,10 @@ $.extend(YomAutoComplete.prototype, {
 			});
 		}
 		var res = null;
-		var getStdItem = this._getStdItem;
-		var rStdItem = getStdItem ? getStdItem(rItem) : rItem;
+		var rStdItem = this._getStdItem(rItem);
 		var i, stdItem;
 		for(i = this._selectedData.length - 1; i >= 0; i--) {
-			stdItem = getStdItem ? getStdItem(this._selectedData[i]) : this._selectedData[i];
+			stdItem = this._getStdItem(this._selectedData[i]);
 			if(stdItem.id == rStdItem.id) {
 				res = this._selectedData.splice(i, 1)[0];
 			}

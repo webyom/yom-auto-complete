@@ -11,7 +11,7 @@ if(list && list.length) {
 			if(!item) {
 				continue;
 			}
-			stdItem = getStdItem ? getStdItem(item, 'LIST') : item;
+			stdItem = getStdItem(item, 'LIST');
 			selectedIdHash[stdItem.id] = 1;
 		}
 	}
@@ -21,7 +21,7 @@ if(list && list.length) {
 			continue;
 		}
 		hasItem = true;
-		stdItem = getStdItem ? getStdItem(item, 'LIST') : item;
+		stdItem = getStdItem(item, 'LIST');
 %>
 		<li data-id="<%=stdItem.id%>" data-index="<%=i%>" title="<%==getListItemText ? getListItemText(item, stdItem) : stdItem.name%>" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">
 			<%if(checkbox) {%>

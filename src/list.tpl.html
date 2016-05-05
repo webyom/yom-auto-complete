@@ -29,7 +29,7 @@ if(list && list.length) {
 					<label class="auto-complete-mockup-checkbox <%=selectedIdHash[stdItem.id] ? 'on' : ''%>"><span></span></label><span>
 			<%}%>
 			<%if(matchedInput) {%>
-				<%=$encodeHtml((getListItemText ? getListItemText(item, stdItem) : stdItem.name).replace(new RegExp('(' + matchedInput.replace(/\\/g, '\\\\').replace(/\./g, '\\.').replace(/\*/g, '\\*') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')%>
+				<%=$encodeHtml((getListItemText ? getListItemText(item, stdItem) : stdItem.name).replace(new RegExp('(' + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')%>
 			<%} else {%>
 				<%==getListItemText ? getListItemText(item, stdItem) : stdItem.name%>
 			<%}%>

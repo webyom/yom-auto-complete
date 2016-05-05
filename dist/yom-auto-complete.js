@@ -123,7 +123,7 @@ $.extend(YomAutoComplete.prototype, {
 			var removeId = $('.active', this._richBox).data('id');
 			if(removeId) {
 				var rmItems = this.removeSelectedItem(removeId);
-				var rmStdItems = this._getStdItem(rmItems);
+				var rmStdItems = this.getStdItem(rmItems);
 				var onRemove = this._opt.onRemove;
 				if(this._checkbox) {
 					$('[data-id="' + removeId + '"] .auto-complete-mockup-checkbox', this._list).removeClass('on');
@@ -230,7 +230,7 @@ $.extend(YomAutoComplete.prototype, {
 					} else {
 						self.hideList();
 					}
-					var rmStdItems = self._getStdItem(rmItems);
+					var rmStdItems = self.getStdItem(rmItems);
 					var onRemove = self._opt.onRemove;
 					onRemove && onRemove.call(self._box[0], rmItems, rmStdItems);
 				}, 0);
@@ -270,28 +270,9 @@ $.extend(YomAutoComplete.prototype, {
 			});
 		}
 	},
-	
-	_getStdItem(item) {
-		if(item == undefined) {
-			return item;
-		} if(this._opt.getStdItem) {
-			return this._opt.getStdItem(item);
-		} else {
-			if(typeof item == 'string') {
-				return {
-					id: item,
-					name: item
-				};
-			} else {
-				item.id = item.id || item.name;
-				item.name = item.name || item.id;
-				return item;
-			}
-		}
-	},
 
 	_getRegExpSeperator: function() {
-		return $.trim(this._separator).replace(/([\.\|\[\]\(\)\{\}\\])/g, '\\$1');
+		return $.trim(this._separator).replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&');
 	},
 
 	_getInputRange: function() {
@@ -352,7 +333,7 @@ $.extend(YomAutoComplete.prototype, {
 			if(!item) {
 				return true;
 			}
-			var stdItem = self._getStdItem(item);
+			var stdItem = self.getStdItem(item);
 			return callback(i, item, stdItem);
 		});
 	},
@@ -427,7 +408,7 @@ $.extend(YomAutoComplete.prototype, {
 				list: this._selectedData,
 				maxWidth: this._box.innerWidth() - 40
 			}, {
-				getStdItem: this._getStdItem.bind(this),
+				getStdItem: this.getStdItem.bind(this),
 				getRichItemText: this._opt.getRichItemText
 			}));
 			this._fixBoxPadding();
@@ -487,14 +468,14 @@ $.extend(YomAutoComplete.prototype, {
 		if(this._freeInput) {
 			return true;
 		}
-		var aStdItem = this._getStdItem(aItem);
+		var aStdItem = this.getStdItem(aItem);
 		var item, stdItem;
 		var hasSame = false;
 		var onRemove = this._opt.onRemove;
 		if(this._selectedData.length >= this._maxSelection) {
 			if(this._maxSelection === 1) {
 				item = this._selectedData[0];
-				stdItem = this._getStdItem(item);
+				stdItem = this.getStdItem(item);
 				if(aStdItem.id == stdItem.id) {
 					return false;
 				} else {
@@ -603,7 +584,7 @@ $.extend(YomAutoComplete.prototype, {
 			return;
 		}
 		item = this._currentListData[index];
-		stdItem = this._getStdItem(item);
+		stdItem = this.getStdItem(item);
 		if(this._checkbox) {
 			checkbox = $('[data-index="' + index + '"] .auto-complete-mockup-checkbox', this._list);
 		}
@@ -700,7 +681,7 @@ $.extend(YomAutoComplete.prototype, {
 					checkbox: this._checkbox,
 					selectedData: this._selectedData
 				}), {
-					getStdItem: this._getStdItem.bind(this),
+					getStdItem: this.getStdItem.bind(this),
 					getListItemText: this._opt.getListItemText
 				}));
 				if(this._list.height() > this._listMaxHeight) {
@@ -737,6 +718,25 @@ $.extend(YomAutoComplete.prototype, {
 	},
 
 	//Public
+	
+	getStdItem(item) {
+		if(item == undefined) {
+			return item;
+		} if(this._opt.getStdItem) {
+			return this._opt.getStdItem(item);
+		} else {
+			if(typeof item == 'string') {
+				return {
+					id: item,
+					name: item
+				};
+			} else {
+				item.id = item.id || item.name;
+				item.name = item.name || item.id;
+				return item;
+			}
+		}
+	},
 
 	renderPreviousList: function(opt) {
 		if(this._previousListData && this._previousListData.length) {
@@ -800,9 +800,9 @@ $.extend(YomAutoComplete.prototype, {
 		var self = this;
 		if(this._dataSource && dataList) {
 			this._selectedData = this._dataSource.filter(function(item) {
-				var stdItem = self._getStdItem(item);
+				var stdItem = self.getStdItem(item);
 				return dataList.some(function(initItem) {
-					var stdInitItem = self._getStdItem(initItem);
+					var stdInitItem = self.getStdItem(initItem);
 					if(stdInitItem.id == stdItem.id) {
 						return true;
 					}
@@ -820,7 +820,7 @@ $.extend(YomAutoComplete.prototype, {
 		if(dataSource && dataSource.length >= 0) {
 			this._dataSource = dataSource = dataSource.concat();
 			$.each(dataSource, function(i, item) {
-				var stdItem = self._getStdItem(item);
+				var stdItem = self.getStdItem(item);
 				if(stdItem.name) {
 					stdItem._pinyinFull = pinyin.getFullChars(stdItem.name);
 					stdItem._pinyinLead = pinyin.getCamelChars(stdItem.name);
@@ -848,7 +848,7 @@ $.extend(YomAutoComplete.prototype, {
 		}
 		var res;
 		var validItem = false;
-		var aStdItem = this._getStdItem(aItem);
+		var aStdItem = this.getStdItem(aItem);
 		if(this._dataSource) {
 			this._each(this._dataSource, function(i, item, stdItem) {
 				if(aStdItem.id == stdItem.id) {
@@ -882,10 +882,10 @@ $.extend(YomAutoComplete.prototype, {
 			});
 		}
 		var res = null;
-		var rStdItem = this._getStdItem(rItem);
+		var rStdItem = this.getStdItem(rItem);
 		var i, stdItem;
 		for(i = this._selectedData.length - 1; i >= 0; i--) {
-			stdItem = this._getStdItem(this._selectedData[i]);
+			stdItem = this.getStdItem(this._selectedData[i]);
 			if(stdItem.id == rStdItem.id) {
 				res = this._selectedData.splice(i, 1)[0];
 			}
@@ -973,7 +973,7 @@ define('./list.tpl.html', [ "require", "exports", "module" ], function(require, 
                         _$out_.push('<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ', selectedIdHash[stdItem.id] ? "on" : "", '"><span></span></label><span>');
                     }
                     if (matchedInput) {
-                        _$out_.push("", $encodeHtml((getListItemText ? getListItemText(item, stdItem) : stdItem.name).replace(new RegExp("(" + matchedInput.replace(/\\/g, "\\\\").replace(/\./g, "\\.").replace(/\*/g, "\\*") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>"), "");
+                        _$out_.push("", $encodeHtml((getListItemText ? getListItemText(item, stdItem) : stdItem.name).replace(new RegExp("(" + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>"), "");
                     } else {
                         _$out_.push("", $encodeHtml(getListItemText ? getListItemText(item, stdItem) : stdItem.name), "");
                     }

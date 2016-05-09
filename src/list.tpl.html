@@ -4,6 +4,10 @@ var getStdItem = $opt.getStdItem;
 var getListItemText = $opt.getListItemText;
 var selectedIdHash = {};
 var i, item, stdItem;
+%>
+
+<ul class="typeahead dropdown-menu">
+<%
 if(list && list.length) {
 	if(checkbox) {
 		for(i = 0; i < selectedData.length; i++) {
@@ -46,3 +50,4 @@ if(list && list.length) {
 } else {%>
 	<li class="disabled"><a><i><%=noResultMsg%></i></a></li>
 <%}%>
+</ul>

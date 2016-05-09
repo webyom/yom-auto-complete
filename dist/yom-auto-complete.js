@@ -59,7 +59,7 @@ $.extend(YomAutoComplete.prototype, {
 		if(this._richSelectionResult) {
 			this._richBox = this._insertNode($('<div data-type="auto-complete-rich-box" class="clearfix"></div>').css($.extend({position: 'absolute', left: '0', top: '0'}, this._opt.richBoxStyle)));
 		}
-		this._list = this._insertNode($('<ul data-type="auto-complete" class="typeahead dropdown-menu"></ul>').css($.extend({width: '218px', display: 'none'}, this._opt.listStyle)));
+		this._list = this._insertNode($('<div data-type="auto-complete" class="auto-complete-list"></div>').css($.extend({width: '218px', display: 'none'}, this._opt.listStyle)));
 		this.setSelectedData(this._opt.initData);
 		this._bindEvent();
 	},
@@ -106,14 +106,14 @@ $.extend(YomAutoComplete.prototype, {
 		if(keyCode === 40 && this._currentListData) {//down
 			var index = (this._currentListIndex + 1) % this._currentListData.length;
 			this._highlightItem(index);
-			if(this._list.css('overflow-y') == 'scroll') {
+			if($('.dropdown-menu', this._list).css('overflow-y') == 'scroll') {
 				this._fixListScroll(index);
 			}
 			evt.preventDefault();
 		} else if(keyCode === 38 && this._currentListData) {//up
 			index = this._currentListIndex === 0 ? this._currentListData.length - 1 : this._currentListIndex - 1;
 			this._highlightItem(index);
-			if(this._list.css('overflow-y') == 'scroll') {
+			if($('.dropdown-menu', this._list).css('overflow-y') == 'scroll') {
 				this._fixListScroll(index);
 			}
 			evt.preventDefault();
@@ -203,7 +203,7 @@ $.extend(YomAutoComplete.prototype, {
 			.on('keydown', this._bind.keydown)
 			.on('keypress', this._bind.keypress)
 			.on('keyup', this._bind.keyup);
-		this._list.on('scroll', this._bind.scroll);
+		$('.dropdown-menu', this._list).on('scroll', this._bind.scroll);
 		this._list.delegate('li[data-index] a', 'click', function(evt) {
 			var i = parseInt($(evt.target).closest('li[data-index]').data('index'));
 			setTimeout(function() {//make sure the blur event of input box occurs first
@@ -246,7 +246,7 @@ $.extend(YomAutoComplete.prototype, {
 			.off('keydown', this._bind.keydown)
 			.off('keypress', this._bind.keypress)
 			.off('keyup', this._bind.keyup);
-		this._list.off('scroll', this._bind.scroll);
+		$('.dropdown-menu', this._list).off('scroll', this._bind.scroll);
 		this._list.undelegate();
 		if(this._richBox) {
 			this._richBox.undelegate();
@@ -312,18 +312,19 @@ $.extend(YomAutoComplete.prototype, {
 
 	_fixListScroll: function(index) {
 		var item, itemHeight, itemPos, listHeight, listScrollTop;
-		item = $('[data-index="' + index + '"]', this._list);
+		var dropdown = $('.dropdown-menu', this._list);
+		item = $('[data-index="' + index + '"]', dropdown);
 		if(!item.length) {
 			return;
 		}
 		itemHeight = item.outerHeight();
 		itemPos = item.position();
-		listHeight = this._list.innerHeight();
-		listScrollTop = this._list.prop('scrollTop');
+		listHeight = dropdown.outerHeight();
+		listScrollTop = dropdown.prop('scrollTop');
 		if(listHeight < itemPos.top + itemHeight) {
-			this._list.prop('scrollTop', itemHeight + itemPos.top + listScrollTop - listHeight);
+			dropdown.prop('scrollTop', itemHeight + itemPos.top + listScrollTop - listHeight);
 		} else if(itemPos.top < 0) {
-			this._list.prop('scrollTop', listScrollTop + itemPos.top);
+			dropdown.prop('scrollTop', listScrollTop + itemPos.top);
 		}
 	},
 
@@ -646,11 +647,6 @@ $.extend(YomAutoComplete.prototype, {
 		var noResultMsg = opt.noResultMsg || this._opt.noResultMsg || 'No Matches';
 		var autoSelect = opt.autoSelect || this._opt.autoSelect;
 		var filteredList, listLen;
-		this._list.css({
-			'overflow-x': 'hidden',
-			'overflow-y': 'hidden',
-			'height': 'auto'
-		});
 		if(dataList && dataList.length) {
 			if(this._hasAnyOtherListShown()) {
 				return;
@@ -683,14 +679,14 @@ $.extend(YomAutoComplete.prototype, {
 				}), {
 					getStdItem: this.getStdItem.bind(this),
 					getListItemText: this._opt.getListItemText
-				}));
-				if(this._list.height() > this._listMaxHeight) {
-					this._list.css({
+				})).show();
+				var dropdown = $('.dropdown-menu', this._list);
+				if(dropdown.height() > this._listMaxHeight) {
+					dropdown.css({
 						'overflow-y': 'scroll',
 						'height': this._listMaxHeight + 'px'
 					});
 				}
-				this._list.show();
 				this._highlightItem(0);
 				this._fixListScroll(0);
 				if(listLen === 1 && autoSelect) {
@@ -763,6 +759,9 @@ $.extend(YomAutoComplete.prototype, {
 	},
 
 	showFullList: function(excludeExist) {
+		if(this._opt.renderFullList) {
+			return this._opt.renderFullList(excludeExist);
+		}
 		var dataSource = this._dataSource;
 		if(dataSource) {
 			this._renderList(dataSource, {isFullList: !excludeExist});
@@ -950,6 +949,7 @@ define('./list.tpl.html', [ "require", "exports", "module" ], function(require, 
             var getListItemText = $opt.getListItemText;
             var selectedIdHash = {};
             var i, item, stdItem;
+            _$out_.push('<ul class="typeahead dropdown-menu">');
             if (list && list.length) {
                 if (checkbox) {
                     for (i = 0; i < selectedData.length; i++) {
@@ -988,6 +988,7 @@ define('./list.tpl.html', [ "require", "exports", "module" ], function(require, 
             } else {
                 _$out_.push('<li class="disabled"><a><i>', noResultMsg, "</i></a></li>");
             }
+            _$out_.push("</ul>");
         }
         return _$out_.join("");
     };
@@ -1155,7 +1156,7 @@ module.exports = pinyin;
 });
 
 define('./yom-auto-complete.less', ['require', 'exports', 'module'], function(require, exports, module) {
-    var cssContent = 'label.auto-complete-mockup-checkbox-label{min-width:80px;max-width:260px;vertical-align:top;font-weight:400;color:#333;margin:0;cursor:pointer;position:relative;line-height:24px;padding-left:28px}label.auto-complete-mockup-checkbox-label label.auto-complete-mockup-checkbox{position:absolute;margin:0;left:0;top:0}label.auto-complete-mockup-checkbox{width:20px;margin:0;overflow:hidden;cursor:pointer}label.auto-complete-mockup-checkbox input{position:absolute;left:-999px}label.auto-complete-mockup-checkbox span{position:relative;display:inline-block;width:18px;height:18px;vertical-align:middle;text-align:center;border:1px solid #888;background-color:#f3f3f3;border-radius:2px}label.auto-complete-mockup-checkbox.disabled{cursor:default}label.auto-complete-mockup-checkbox.disabled span{border:2px solid #ccc}label.auto-complete-mockup-checkbox.on span:before{position:absolute;content:"";display:inline-block;width:8px;height:8px;left:50%;top:50%;margin-left:-4px;margin-top:-4px;background-color:#888;border-radius:2px}li.active label.auto-complete-mockup-checkbox-label{color:#fff}.auto-complete-rich-box-list{cursor:text}.auto-complete-rich-item{border:1px solid #ccc;line-height:24px;padding:2px 6px;margin:2px 0 0 2px;background-color:#f3f3f3;display:inline-block;position:relative;cursor:default;border-radius:2px}.auto-complete-rich-item.active{border:1px solid #888}.auto-complete-rich-item .text{display:inline-block;height:24px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding-right:15px;vertical-align:bottom}.auto-complete-rich-item .icon-remove{cursor:pointer;color:#888;position:absolute;right:2px;top:2px;font-style:normal;font-weight:700;font-size:16px;opacity:.5}.auto-complete-rich-item .icon-remove:hover{opacity:1}';
+    var cssContent = '.auto-complete-list{position:absolute;top:100%;margin-top:2px;margin-bottom:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,.175)}.auto-complete-list>.dropdown-menu{position:static;width:100%;display:block;margin:0;box-shadow:none}label.auto-complete-mockup-checkbox-label{min-width:80px;max-width:260px;vertical-align:top;font-weight:400;color:#333;margin:0;cursor:pointer;position:relative;line-height:24px;padding-left:28px}label.auto-complete-mockup-checkbox-label label.auto-complete-mockup-checkbox{position:absolute;margin:0;left:0;top:0}label.auto-complete-mockup-checkbox{width:20px;margin:0;overflow:hidden;cursor:pointer}label.auto-complete-mockup-checkbox input{position:absolute;left:-999px}label.auto-complete-mockup-checkbox span{position:relative;display:inline-block;width:18px;height:18px;vertical-align:middle;text-align:center;border:1px solid #888;background-color:#f3f3f3;border-radius:2px}label.auto-complete-mockup-checkbox.disabled{cursor:default}label.auto-complete-mockup-checkbox.disabled span{border:2px solid #ccc}label.auto-complete-mockup-checkbox.on span:before{position:absolute;content:"";display:inline-block;width:8px;height:8px;left:50%;top:50%;margin-left:-4px;margin-top:-4px;background-color:#888;border-radius:2px}li.active label.auto-complete-mockup-checkbox-label{color:#fff}.auto-complete-rich-box-list{cursor:text}.auto-complete-rich-item{border:1px solid #ccc;line-height:24px;padding:2px 6px;margin:2px 0 0 2px;background-color:#f3f3f3;display:inline-block;position:relative;cursor:default;border-radius:2px}.auto-complete-rich-item.active{border:1px solid #888}.auto-complete-rich-item .text{display:inline-block;height:24px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding-right:15px;vertical-align:bottom}.auto-complete-rich-item .icon-remove{cursor:pointer;color:#888;position:absolute;right:2px;top:2px;font-style:normal;font-weight:700;font-size:16px;opacity:.5}.auto-complete-rich-item .icon-remove:hover{opacity:1}';
     var moduleUri = module && module.uri;
     var head = document.head || document.getElementsByTagName("head")[0];
     var styleTagId = "yom-style-module-inject-tag";

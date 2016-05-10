@@ -547,6 +547,9 @@ $.extend(YomAutoComplete.prototype, {
 				if(!matched && item._pinyinLead != stdItem.name) {
 					matched = item._pinyinLead.toLowerCase().indexOf(inputLowerCase) >= 0;
 				}
+				if(!matched && item._summary) {
+					matched = item._summary.replace(/ - /g, '').toLowerCase().indexOf(inputLowerCase) >= 0;
+				}
 				if(matched) {
 					if(self._excludeExist) {
 						self._each(self._selectedData, function(j, item2, stdItem2) {
@@ -820,9 +823,22 @@ $.extend(YomAutoComplete.prototype, {
 			this._dataSource = dataSource = dataSource.concat();
 			$.each(dataSource, function(i, item) {
 				var stdItem = self.getStdItem(item);
-				if(stdItem.name) {
-					stdItem._pinyinFull = pinyin.getFullChars(stdItem.name);
-					stdItem._pinyinLead = pinyin.getCamelChars(stdItem.name);
+				if(!stdItem._summary && self._opt.summaryKeys) {
+					var summary = [];
+					$.each(self._opt.summaryKeys, function(i, key) {
+						if(item[key] && typeof item[key] == 'string') {
+							summary.push(item[key]);
+						}
+					});
+					stdItem._summary = summary.join(' - ');
+				}
+				if(stdItem._summary) {
+					var summary = stdItem._summary.replace(/ - /g, '');
+					stdItem._pinyinFull = stdItem._pinyinFull || pinyin.getFullChars(summary);
+					stdItem._pinyinLead = stdItem._pinyinLead || pinyin.getCamelChars(summary);
+				} else if(stdItem.name) {
+					stdItem._pinyinFull = stdItem._pinyinFull || pinyin.getFullChars(stdItem.name);
+					stdItem._pinyinLead = stdItem._pinyinLead || pinyin.getCamelChars(stdItem.name);
 				}
 				dataSource[i] = stdItem;
 			});

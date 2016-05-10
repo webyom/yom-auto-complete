@@ -119,7 +119,7 @@ $.extend(YomAutoComplete.prototype, {
 		} else if(keyCode === 9) {//tab
 			this.hideList();
 		} else if(this._richSelectionResult && (keyCode === 8 || keyCode === 46) && this._getInputRange().end === 0) {
-			var removeId = $('.active', this._richBox).data('id');
+			var removeId = $('.active', this._richBox).attr('data-id');
 			if(removeId) {
 				var rmItems = this.removeSelectedItem(removeId);
 				var rmStdItems = this.getStdItem(rmItems);
@@ -204,12 +204,12 @@ $.extend(YomAutoComplete.prototype, {
 			.on('keyup', this._bind.keyup);
 		$('.dropdown-menu', this._list).on('scroll', this._bind.scroll);
 		this._list.delegate('li[data-index] a', 'click', function(evt) {
-			var i = parseInt($(evt.target).closest('li[data-index]').data('index'));
+			var i = parseInt($(evt.target).closest('li[data-index]').attr('data-index'));
 			setTimeout(function() {//make sure the blur event of input box occurs first
 				self._selectItem(i);
 			}, 0);
 		}).delegate('li[data-index] a', 'mouseover', function(evt) {
-			self._highlightItem(parseInt($(this).closest('li[data-index]').data('index')));
+			self._highlightItem(parseInt($(this).closest('li[data-index]').attr('data-index')));
 		});
 		if(this._richBox) {
 			this._richBox.delegate('.auto-complete-rich-box-list', 'click', function(evt) {
@@ -221,7 +221,7 @@ $.extend(YomAutoComplete.prototype, {
 				$('.auto-complete-rich-item', self._richBox).removeClass('active');
 				$(this).addClass('active');
 			}).delegate('.icon-remove', 'click', function(evt) {
-				var id = $(this).closest('.auto-complete-rich-item').data('id');
+				var id = $(this).closest('.auto-complete-rich-item').attr('data-id');
 				setTimeout(function() {//make sure the click event on document.body occurs before the item removed
 					var rmItems = self.removeSelectedItem(id);
 					if(self._checkbox) {
@@ -799,7 +799,7 @@ $.extend(YomAutoComplete.prototype, {
 
 	setSelectedData: function(dataList) {
 		var self = this;
-		if(this._dataSource && dataList) {
+		if(this._dataSource && dataList && this._opt.mustSelectInDataSource !== false) {
 			this._selectedData = this._dataSource.filter(function(item) {
 				var stdItem = self.getStdItem(item);
 				return dataList.some(function(initItem) {

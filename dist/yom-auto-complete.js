@@ -715,7 +715,7 @@ $.extend(YomAutoComplete.prototype, {
 
 	//Public
 	
-	getStdItem(item) {
+	getStdItem: function(item) {
 		if(item == undefined) {
 			return item;
 		} if(this._opt.getStdItem) {

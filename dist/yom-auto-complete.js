@@ -678,7 +678,8 @@ $.extend(YomAutoComplete.prototype, {
 					list: this._currentListData,
 					matchedInput: matchedInput,
 					checkbox: this._checkbox,
-					selectedData: this._selectedData
+					selectedData: this._selectedData,
+					noResultMsg: noResultMsg
 				}), {
 					getStdItem: this.getStdItem.bind(this),
 					getListItemText: this._opt.getListItemText

@@ -575,7 +575,7 @@ $.extend(YomAutoComplete.prototype, {
 			}
 		} else if(this._opt.getMatchedList) {
 			this._opt.getMatchedList(input, callback);
-		} 
+		}
 	},
 
 	_selectItem: function(index) {
@@ -590,7 +590,7 @@ $.extend(YomAutoComplete.prototype, {
 		item = this._currentListData[index];
 		stdItem = this.getStdItem(item);
 		if(this._checkbox) {
-			checkbox = $('[data-index="' + index + '"] .auto-complete-mockup-checkbox', this._list);
+			checkbox = $('[data-id="' + stdItem.id + '"] .auto-complete-mockup-checkbox', this._list);
 		}
 		if(checkbox && checkbox.length) {
 			this._cancelBlurHide();
@@ -718,7 +718,7 @@ $.extend(YomAutoComplete.prototype, {
 	},
 
 	//Public
-	
+
 	getStdItem: function(item) {
 		if(item == undefined) {
 			return item;

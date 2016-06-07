@@ -719,19 +719,23 @@ $.extend(YomAutoComplete.prototype, {
 	//Public
 
 	getStdItem: function(item) {
-		if(item == undefined) {
+		if(item == undefined || item._std) {
 			return item;
 		} if(this._opt.getStdItem) {
-			return this._opt.getStdItem(item);
+			item = this._opt.getStdItem(item);
+			item._std = true;
+			return item;
 		} else {
 			if(typeof item == 'string') {
 				return {
 					id: item,
-					name: item
+					name: item,
+					_std: true
 				};
 			} else {
 				item.id = item.id || item.name;
 				item.name = item.name || item.id;
+				item._std = true;
 				return item;
 			}
 		}

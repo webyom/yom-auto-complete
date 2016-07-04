@@ -974,55 +974,54 @@ define('./list.tpl.html', [ "require", "exports", "module" ], function(require, 
     }
     exports.render = function($data, $opt) {
         $data = $data || {};
-        var _$out_ = [];
+        var _$out_ = "";
         var $print = function(str) {
-            _$out_.push(str);
+            _$out_ += str;
         };
-        with ($data) {
-            var hasItem = false;
-            var getListItemText = $opt.getListItemText;
-            var selectedIdHash = {};
-            var i, item;
-            _$out_.push('<ul class="typeahead dropdown-menu">');
-            if (list && list.length) {
-                if (checkbox) {
-                    for (i = 0; i < selectedData.length; i++) {
-                        item = selectedData[i];
-                        if (!item) {
-                            continue;
-                        }
-                        selectedIdHash[item.id] = 1;
-                    }
-                }
-                for (i = 0; i < list.length; i++) {
-                    item = list[i];
+        var list = $data.list, matchedInput = $data.matchedInput, checkbox = $data.checkbox, selectedData = $data.selectedData, noResultMsg = $data.noResultMsg;
+        var hasItem = false;
+        var getListItemText = $opt.getListItemText;
+        var selectedIdHash = {};
+        var i, item;
+        _$out_ += '<ul class="typeahead dropdown-menu">';
+        if (list && list.length) {
+            if (checkbox) {
+                for (i = 0; i < selectedData.length; i++) {
+                    item = selectedData[i];
                     if (!item) {
                         continue;
                     }
-                    hasItem = true;
-                    _$out_.push('<li data-id="', item.id, '" data-index="', i, '" title="', $encodeHtml(getListItemText ? getListItemText(item) : item.name), '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">');
-                    if (checkbox) {
-                        _$out_.push('<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ', selectedIdHash[item.id] ? "on" : "", '"><span></span></label><span>');
-                    }
-                    if (matchedInput) {
-                        _$out_.push("", $encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp("(" + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>"), "");
-                    } else {
-                        _$out_.push("", $encodeHtml(getListItemText ? getListItemText(item) : item.name), "");
-                    }
-                    if (checkbox) {
-                        _$out_.push("</span></label>");
-                    }
-                    _$out_.push("</a></li>");
+                    selectedIdHash[item.id] = 1;
                 }
-                if (!hasItem) {
-                    _$out_.push('<li class="disabled"><a><i>', noResultMsg, "</i></a></li>");
-                }
-            } else {
-                _$out_.push('<li class="disabled"><a><i>', noResultMsg, "</i></a></li>");
             }
-            _$out_.push("</ul>");
+            for (i = 0; i < list.length; i++) {
+                item = list[i];
+                if (!item) {
+                    continue;
+                }
+                hasItem = true;
+                _$out_ += '<li data-id="' + item.id + '" data-index="' + i + '" title="' + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">';
+                if (checkbox) {
+                    _$out_ += '<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ' + (selectedIdHash[item.id] ? "on" : "") + '"><span></span></label><span>';
+                }
+                if (matchedInput) {
+                    _$out_ += "" + $encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp("(" + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>") + "";
+                } else {
+                    _$out_ += "" + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + "";
+                }
+                if (checkbox) {
+                    _$out_ += "</span></label>";
+                }
+                _$out_ += "</a></li>";
+            }
+            if (!hasItem) {
+                _$out_ += '<li class="disabled"><a><i>' + noResultMsg + "</i></a></li>";
+            }
+        } else {
+            _$out_ += '<li class="disabled"><a><i>' + noResultMsg + "</i></a></li>";
         }
-        return _$out_.join("");
+        _$out_ += "</ul>";
+        return _$out_;
     };
 });
 
@@ -1032,64 +1031,63 @@ define('./group-list.tpl.html', [ "require", "exports", "module" ], function(req
     }
     exports.render = function($data, $opt) {
         $data = $data || {};
-        var _$out_ = [];
+        var _$out_ = "";
         var $print = function(str) {
-            _$out_.push(str);
+            _$out_ += str;
         };
-        with ($data) {
-            var hasItem = false;
-            var getListItemText = $opt.getListItemText;
-            var selectedIdHash = {};
-            var i, p, item;
-            var groups = {};
-            if (list && list.length) {
-                if (checkbox) {
-                    for (i = 0; i < selectedData.length; i++) {
-                        item = selectedData[i];
-                        if (!item) {
-                            continue;
-                        }
-                        selectedIdHash[item.id] = 1;
+        var list = $data.list, matchedInput = $data.matchedInput, checkbox = $data.checkbox, selectedData = $data.selectedData, noResultMsg = $data.noResultMsg;
+        var hasItem = false;
+        var getListItemText = $opt.getListItemText;
+        var selectedIdHash = {};
+        var i, p, item;
+        var groups = {};
+        if (list && list.length) {
+            if (checkbox) {
+                for (i = 0; i < selectedData.length; i++) {
+                    item = selectedData[i];
+                    if (!item) {
+                        continue;
                     }
+                    selectedIdHash[item.id] = 1;
                 }
+            }
+            for (i = 0; i < list.length; i++) {
+                item = list[i];
+                if (item) {
+                    hasItem = true;
+                    item._i = i;
+                    groups[item._group] = groups[item._group] || [];
+                    groups[item._group].push(item);
+                }
+            }
+        }
+        _$out_ += '<ul class="typeahead dropdown-menu">';
+        if (hasItem) {
+            for (p in groups) {
+                list = groups[p];
+                _$out_ += "<h3><i>" + $encodeHtml(p) + "</i></h3>";
                 for (i = 0; i < list.length; i++) {
                     item = list[i];
-                    if (item) {
-                        hasItem = true;
-                        item._i = i;
-                        groups[item._group] = groups[item._group] || [];
-                        groups[item._group].push(item);
+                    _$out_ += '<li data-id="' + item.id + '" data-index="' + item._i + '" title="' + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">';
+                    if (checkbox) {
+                        _$out_ += '<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ' + (selectedIdHash[item.id] ? "on" : "") + '"><span></span></label><span>';
                     }
+                    if (matchedInput) {
+                        _$out_ += "" + $encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp("(" + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>") + "";
+                    } else {
+                        _$out_ += "" + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + "";
+                    }
+                    if (checkbox) {
+                        _$out_ += "</span></label>";
+                    }
+                    _$out_ += "</a></li>";
                 }
             }
-            _$out_.push('<ul class="typeahead dropdown-menu">');
-            if (hasItem) {
-                for (p in groups) {
-                    list = groups[p];
-                    _$out_.push("<h3><i>", $encodeHtml(p), "</i></h3>");
-                    for (i = 0; i < list.length; i++) {
-                        item = list[i];
-                        _$out_.push('<li data-id="', item.id, '" data-index="', item._i, '" title="', $encodeHtml(getListItemText ? getListItemText(item) : item.name), '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">');
-                        if (checkbox) {
-                            _$out_.push('<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ', selectedIdHash[item.id] ? "on" : "", '"><span></span></label><span>');
-                        }
-                        if (matchedInput) {
-                            _$out_.push("", $encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp("(" + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>"), "");
-                        } else {
-                            _$out_.push("", $encodeHtml(getListItemText ? getListItemText(item) : item.name), "");
-                        }
-                        if (checkbox) {
-                            _$out_.push("</span></label>");
-                        }
-                        _$out_.push("</a></li>");
-                    }
-                }
-            } else {
-                _$out_.push('<li class="disabled"><a><i>', noResultMsg, "</i></a></li>");
-            }
-            _$out_.push("</ul>");
+        } else {
+            _$out_ += '<li class="disabled"><a><i>' + noResultMsg + "</i></a></li>";
         }
-        return _$out_.join("");
+        _$out_ += "</ul>";
+        return _$out_;
     };
 });
 
@@ -1099,20 +1097,19 @@ define('./rich-item-list.tpl.html', [ "require", "exports", "module" ], function
     }
     exports.render = function($data, $opt) {
         $data = $data || {};
-        var _$out_ = [];
+        var _$out_ = "";
         var $print = function(str) {
-            _$out_.push(str);
+            _$out_ += str;
         };
-        with ($data) {
-            _$out_.push('<div class="auto-complete-rich-box-list">');
-            var getRichItemText = $opt.getRichItemText;
-            for (var i = 0, l = list.length; i < l; i++) {
-                var item = list[i];
-                _$out_.push('<span data-id="', item.id, '" class="auto-complete-rich-item"><span class="text" style="max-width: ', maxWidth, 'px;" title="', $encodeHtml(getRichItemText ? getRichItemText(item, item) : item.name), '">', $encodeHtml(getRichItemText ? getRichItemText(item, item) : item.name), '</span><i class="icon-remove">×</i></span>');
-            }
-            _$out_.push("</div>");
+        var list = $data.list, maxWidth = $data.maxWidth;
+        _$out_ += '<div class="auto-complete-rich-box-list">';
+        var getRichItemText = $opt.getRichItemText;
+        for (var i = 0, l = list.length; i < l; i++) {
+            var item = list[i];
+            _$out_ += '<span data-id="' + item.id + '" class="auto-complete-rich-item"><span class="text" style="max-width: ' + maxWidth + 'px;" title="' + $encodeHtml(getRichItemText ? getRichItemText(item, item) : item.name) + '">' + $encodeHtml(getRichItemText ? getRichItemText(item, item) : item.name) + '</span><i class="icon-remove">×</i></span>';
         }
-        return _$out_.join("");
+        _$out_ += "</div>";
+        return _$out_;
     };
 });
 

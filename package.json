@@ -1,6 +1,6 @@
 {
   "name": "yom-auto-complete",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "An auto complete widget.",
   "keywords": [
     "form util"
@@ -24,10 +24,9 @@
     "node": ">= 0.8.0"
   },
   "scripts": {},
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "gulp": "^3.8.5",
-    "gulp-amd-bundler": "^0.2.1"
+    "gulp-amd-bundler": "^0.2.5"
   }
 }

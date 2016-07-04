@@ -1,5 +1,6 @@
 var $ = window.jQuery || window.$;
 var listTpl = require('./list.tpl.html');
+var groupListTpl = require('./group-list.tpl.html');
 var richItemListTpl = require('./rich-item-list.tpl.html');
 var pinyin = require('./pinyin');
 require('./yom-auto-complete.less');
@@ -21,9 +22,10 @@ var YomAutoComplete = function(box, opt) {
 	this._excludeExist = !!opt.excludeExist;
 	this._checkbox = this._maxSelection > 1 && !this._excludeExist && !this._freeInput;
 	this._dataSource = null;
-	this._selectedData = opt.initData || [];
-	this._listTpl = opt.listTpl || listTpl;
-	this._listTplData = opt.listTplData || {};
+	this._selectedData = (opt.initData || []).map(function(item) {
+		return self.getStdItem(item);
+	});
+	this._listTpl = opt.listTpl || opt.group && groupListTpl || listTpl;
 	this._previousListData = null;
 	this._currentListData = null;
 	this._currentListIndex = 0;
@@ -327,17 +329,6 @@ $.extend(YomAutoComplete.prototype, {
 		}
 	},
 
-	_each: function(dataList, callback) {
-		var self = this;
-		$.each(dataList, function(i, item) {
-			if(!item) {
-				return true;
-			}
-			var stdItem = self.getStdItem(item);
-			return callback(i, item, stdItem);
-		});
-	},
-
 	_fixBoxPadding: function() {
 		if(!this._richBox || !this._box[0].clientWidth) {
 			return;
@@ -408,14 +399,13 @@ $.extend(YomAutoComplete.prototype, {
 				list: this._selectedData,
 				maxWidth: this._box.innerWidth() - 40
 			}, {
-				getStdItem: this.getStdItem.bind(this),
 				getRichItemText: this._opt.getRichItemText
 			}));
 			this._fixBoxPadding();
 			this._checkPlaceHolder();
 		} else {
-			this._each(this._selectedData, function(i, item, stdItem) {
-				nameList.push(stdItem.name);
+			$.each(this._selectedData, function(i, item) {
+				nameList.push(item.name);
 			});
 			if(nameList.length) {
 				if(nameList.length > 1 || this._maxSelection > 1) {
@@ -436,15 +426,14 @@ $.extend(YomAutoComplete.prototype, {
 		var nameList = this._box.val().split(new RegExp('\\s*' + this._getRegExpSeperator() + '\\s*'));
 		var dataList = [];
 		var rmItems = [];
-		var rmStdItems = [];
 		var onRemove = this._opt.onRemove;
 		if(nameList.length) {
 			nameList[nameList.length - 1] = this._getToBeMatchedInput();
 		}
-		this._each(this._selectedData, function(i, item, stdItem) {
+		$.each(this._selectedData, function(i, item) {
 			var inBox = false;
 			$.each(nameList, function(j, name) {
-				if($.trim(stdItem.name) == $.trim(name)) {
+				if($.trim(item.name) == $.trim(name)) {
 					inBox = true;
 					dataList.push(item);
 					return false;
@@ -452,12 +441,11 @@ $.extend(YomAutoComplete.prototype, {
 			});
 			if(!inBox) {
 				rmItems.push(item);
-				rmStdItems.push(stdItem);
 			}
 		});
 		this._selectedData = dataList;
 		if(onRemove && rmItems.length) {
-			onRemove.call(this._box[0], rmItems, rmStdItems);
+			onRemove.call(this._box[0], rmItems);
 		}
 	},
 
@@ -468,20 +456,18 @@ $.extend(YomAutoComplete.prototype, {
 		if(this._freeInput) {
 			return true;
 		}
-		var aStdItem = this.getStdItem(aItem);
-		var item, stdItem;
+		var item;
 		var hasSame = false;
 		var onRemove = this._opt.onRemove;
 		if(this._selectedData.length >= this._maxSelection) {
 			if(this._maxSelection === 1) {
 				item = this._selectedData[0];
-				stdItem = this.getStdItem(item);
-				if(aStdItem.id == stdItem.id) {
+				if(aItem.id == item.id) {
 					return false;
 				} else {
 					this._selectedData = [aItem];
 					if(onRemove) {
-						onRemove.call(this._box[0], [item], [stdItem]);
+						onRemove.call(this._box[0], [item]);
 					}
 					return true;
 				}
@@ -489,8 +475,8 @@ $.extend(YomAutoComplete.prototype, {
 				return false;
 			}
 		}
-		this._each(this._selectedData, function(i, item, stdItem) {
-			if(aStdItem.id == stdItem.id) {
+		$.each(this._selectedData, function(i, item) {
+			if(aItem.id == item.id) {
 				hasSame = true;
 				return false;
 			}
@@ -531,28 +517,48 @@ $.extend(YomAutoComplete.prototype, {
 
 	_getMatchedList: function(input, callback) {
 		var self = this;
+		var inputLowerCase = input.toLowerCase();
+		var iGroup, iName;
+		if(inputLowerCase.indexOf(':') === 0) {
+			inputLowerCase = inputLowerCase.split(':');
+			iGroup = inputLowerCase[1];
+			iName = inputLowerCase.slice(2).join(':');
+		} else {
+			iName = inputLowerCase;
+		}
 		var matchedList = [];
 		if(this._dataSource) {
-			this._each(this._dataSource, function(i, item, stdItem) {
-				var hasSame = false;
+			$.each(this._dataSource, function(i, item) {
 				if(matchedList.length >= self._listMaxLength) {
 					return false;
 				}
-				var inputLowerCase = input.toLowerCase();
-				var matched = stdItem.name.toLowerCase().indexOf(inputLowerCase) >= 0;
-				if(!matched && item._pinyinFull != stdItem.name) {
-					matched = item._pinyinFull.toLowerCase().indexOf(inputLowerCase) >= 0;
+				var hasSame = false;
+				var matched;
+				if(iGroup && item._group) {
+					matched = item._group.toLowerCase().indexOf(iGroup) >= 0;
+					if(!matched && item._groupPinyinFull != item._group) {
+						matched = item._groupPinyinFull.toLowerCase().indexOf(iGroup) >= 0;
+					}
+					if(!matched && item._groupPinyinLead != item._group) {
+						matched = item._groupPinyinLead.toLowerCase().indexOf(iGroup) >= 0;
+					}
 				}
-				if(!matched && item._pinyinLead != stdItem.name) {
-					matched = item._pinyinLead.toLowerCase().indexOf(inputLowerCase) >= 0;
-				}
-				if(!matched && item._summary) {
-					matched = item._summary.replace(/ - /g, '').toLowerCase().indexOf(inputLowerCase) >= 0;
+				if(!iGroup || matched && iName) {
+					matched = item.name && item.name.toLowerCase().indexOf(iName) >= 0;
+					if(!matched && item._pinyinFull != item.name) {
+						matched = item._pinyinFull.toLowerCase().indexOf(iName) >= 0;
+					}
+					if(!matched && item._pinyinLead != item.name) {
+						matched = item._pinyinLead.toLowerCase().indexOf(iName) >= 0;
+					}
+					if(!matched && item._summary) {
+						matched = item._summary.replace(/ - /g, '').toLowerCase().indexOf(iName) >= 0;
+					}
 				}
 				if(matched) {
 					if(self._excludeExist) {
-						self._each(self._selectedData, function(j, item2, stdItem2) {
-							if(stdItem.id == stdItem2.id) {
+						$.each(self._dataSource, function(j, item2) {
+							if(item.id == item2.id) {
 								hasSame = true;
 								return false;
 							}
@@ -570,7 +576,7 @@ $.extend(YomAutoComplete.prototype, {
 			} else if(callback) {
 				callback(matchedList, input);
 			} else {
-				this.renderList(matchedList, {matchedInput: input});
+				this.renderList(matchedList, {matchedInput: iName});
 			}
 		} else if(this._opt.getMatchedList) {
 			this._opt.getMatchedList(input, callback);
@@ -582,47 +588,46 @@ $.extend(YomAutoComplete.prototype, {
 		var onBeforeSelect = this._opt.onBeforeSelect;
 		var onSelect = this._opt.onSelect;
 		var onRemove = this._opt.onRemove;
-		var item, stdItem, checkbox, added;
+		var item, checkbox, added;
 		if(!(index >= 0 && this._currentListData && typeof this._currentListData[index] != 'undefined')) {
 			return;
 		}
 		item = this._currentListData[index];
-		stdItem = this.getStdItem(item);
 		if(this._checkbox) {
-			checkbox = $('[data-id="' + stdItem.id + '"] .auto-complete-mockup-checkbox', this._list);
+			checkbox = $('[data-id="' + item.id + '"] .auto-complete-mockup-checkbox', this._list);
 		}
 		if(checkbox && checkbox.length) {
 			this._cancelBlurHide();
 			if(checkbox.hasClass('on')) {
 				this.removeSelectedItem(item);
 				checkbox.removeClass('on');
-				onRemove && onRemove.call(this._box[0], [item], [stdItem]);
+				onRemove && onRemove.call(this._box[0], [item]);
 			} else {
-				if(!onBeforeSelect || onBeforeSelect.call(this._box[0], item, stdItem, index) !== false) {
+				if(!onBeforeSelect || onBeforeSelect.call(this._box[0], item, index) !== false) {
 					added = this._addItem(item);
 					if(added && !this._richSelectionResult) {
-						this._box.val(this._trimr() + stdItem.name + (this._maxSelection > 1 ? this._separator : ''));
+						this._box.val(this._trimr() + item.name + (this._maxSelection > 1 ? this._separator : ''));
 						this._syncFromBox();
 					} else {
 						this._syncFromDataList();
 					}
 					if(added) {
 						checkbox.addClass('on');
-						onSelect && onSelect.call(this._box[0], item, stdItem, index);
+						onSelect && onSelect.call(this._box[0], item, index);
 					}
 				}
 			}
 		} else {
-			if(!onBeforeSelect || onBeforeSelect.call(this._box[0], item, stdItem, index) !== false) {
+			if(!onBeforeSelect || onBeforeSelect.call(this._box[0], item, index) !== false) {
 				added = this._addItem(item);
 				if(added && !this._richSelectionResult) {
-					this._box.val(this._trimr() + stdItem.name + (this._maxSelection > 1 ? this._separator : ''));
+					this._box.val(this._trimr() + item.name + (this._maxSelection > 1 ? this._separator : ''));
 					this._syncFromBox();
 				} else {
 					this._syncFromDataList();
 				}
 				this.hideList();
-				added && onSelect && onSelect.call(this._box[0], item, stdItem, index);
+				added && onSelect && onSelect.call(this._box[0], item, index);
 			}
 		}
 	},
@@ -643,7 +648,6 @@ $.extend(YomAutoComplete.prototype, {
 		opt = opt || {};
 		var self = this;
 		var listTpl = opt.listTpl || this._listTpl;
-		var listTplData = opt.listTplData || this._listTplData;
 		var matchedInput = opt.matchedInput || '';
 		var isFullList = opt.isFullList;
 		var noResultMsg = opt.noResultMsg || this._opt.noResultMsg || 'No Matches';
@@ -655,10 +659,11 @@ $.extend(YomAutoComplete.prototype, {
 			}
 			if(this._excludeExist && !isFullList) {
 				filteredList = [];
-				this._each(dataList, function(i, item, stdItem) {
+				$.each(dataList, function(i, item) {
 					var hasSame = false;
-					self._each(self._selectedData, function(j, item2, stdItem2) {
-						if(stdItem.id == stdItem2.id) {
+					item = self.getStdItem(item);
+					$.each(self._selectedData, function(j, item2) {
+						if(item.id == item2.id) {
 							hasSame = true;
 							return false;
 						}
@@ -669,18 +674,19 @@ $.extend(YomAutoComplete.prototype, {
 				});
 				this._currentListData = filteredList;
 			} else {
-				this._currentListData = dataList;
+				this._currentListData = dataList.map(function(item) {
+					return self.getStdItem(item);
+				});
 			}
 			listLen = this._currentListData.length;
 			if(listLen) {
-				this._list.html(listTpl.render($.extend(listTplData, {
+				this._list.html(listTpl.render({
 					list: this._currentListData,
 					matchedInput: matchedInput,
 					checkbox: this._checkbox,
 					selectedData: this._selectedData,
 					noResultMsg: noResultMsg
-				}), {
-					getStdItem: this.getStdItem.bind(this),
+				}, {
 					getListItemText: this._opt.getListItemText
 				})).show();
 				var dropdown = $('.dropdown-menu', this._list);
@@ -784,8 +790,8 @@ $.extend(YomAutoComplete.prototype, {
 		var res = [];
 		this._syncFromDataList();
 		if(typeof getItem == 'function') {
-			this._each(this._selectedData, function(i, item, stdItem) {
-				res.push(getItem(item, stdItem));
+			$.each(this._selectedData, function(i, item) {
+				res.push(getItem(item));
 			});
 		} else {
 			res = this._selectedData.concat();
@@ -793,11 +799,11 @@ $.extend(YomAutoComplete.prototype, {
 		return res;
 	},
 
-	getSelectedPropList: function(prop, raw) {
+	getSelectedPropList: function(prop) {
 		var res = [];
 		this._syncFromDataList();
-		this._each(this._selectedData, function(i, item, stdItem) {
-			res.push(raw ? item[prop] : stdItem[prop]);
+		$.each(this._selectedData, function(i, item) {
+			res.push(item[prop]);
 		});
 		return res;
 	},
@@ -806,26 +812,45 @@ $.extend(YomAutoComplete.prototype, {
 		var self = this;
 		if(this._dataSource && dataList && this._opt.mustSelectInDataSource !== false) {
 			this._selectedData = this._dataSource.filter(function(item) {
-				var stdItem = self.getStdItem(item);
 				return dataList.some(function(initItem) {
 					var stdInitItem = self.getStdItem(initItem);
-					if(stdInitItem.id == stdItem.id) {
+					if(stdInitItem.id == item.id) {
 						return true;
 					}
 					return false;
 				});
 			});
 		} else {
-			this._selectedData = dataList || [];
+			this._selectedData = (dataList || []).map(function(item) {
+				return self.getStdItem(item);
+			});
 		}
 		this._syncFromDataList();
 	},
 
 	setDataSource: function(dataSource) {
 		var self = this;
+		if (this._opt.group && dataSource) {
+			var tmp = [];
+			var keys = Object.keys(dataSource);
+			$.each(keys, function(i, key) {
+				var group = dataSource[key];
+				if(self._opt.getStdGroupItem) {
+					group = self._opt.getStdGroupItem(group, key);
+				}
+				group.data = group.data || [];
+				$.each(group.data, function(j, item) {
+					var stdItem = self.getStdItem(item);
+					stdItem._group = group.name || key;
+					stdItem._groupPinyinFull = stdItem._groupPinyinFull || pinyin.getFullChars(stdItem._group);
+					stdItem._groupPinyinLead = stdItem._groupPinyinLead || pinyin.getCamelChars(stdItem._group);
+					tmp.push(stdItem);
+				});
+			});
+			dataSource = tmp;
+		}
 		if(dataSource && dataSource.length >= 0) {
-			this._dataSource = dataSource = dataSource.concat();
-			$.each(dataSource, function(i, item) {
+			this._dataSource = dataSource.map(function(item) {
 				var stdItem = self.getStdItem(item);
 				if(!stdItem._summary && self._opt.summaryKeys) {
 					var summary = [];
@@ -843,21 +868,12 @@ $.extend(YomAutoComplete.prototype, {
 				} else if(stdItem.name) {
 					stdItem._pinyinFull = stdItem._pinyinFull || pinyin.getFullChars(stdItem.name);
 					stdItem._pinyinLead = stdItem._pinyinLead || pinyin.getCamelChars(stdItem.name);
+				} else {
+					stdItem._pinyinFull = '';
+					stdItem._pinyinLead = '';
 				}
-				dataSource[i] = stdItem;
+				return stdItem;
 			});
-		}
-	},
-
-	setListTpl: function(listTpl) {
-		if(listTpl) {
-			this._listTpl = listTpl;
-		}
-	},
-
-	setListTplData: function(listTplData) {
-		if(listTplData) {
-			this._listTplData = listTplData;
 		}
 	},
 
@@ -867,12 +883,11 @@ $.extend(YomAutoComplete.prototype, {
 		}
 		var res;
 		var validItem = false;
-		var aStdItem = this.getStdItem(aItem);
+		var aItem = this.getStdItem(aItem);
 		if(this._dataSource) {
-			this._each(this._dataSource, function(i, item, stdItem) {
-				if(aStdItem.id == stdItem.id) {
+			$.each(this._dataSource, function(i, item) {
+				if(aItem.id == item.id) {
 					aItem = item;
-					aStdItem = stdItem;
 					validItem = true;
 					return false;
 				}
@@ -893,19 +908,18 @@ $.extend(YomAutoComplete.prototype, {
 			return null;
 		}
 		if(typeof rItem != 'object') {
-			this._each(this._selectedData, function(i, item, stdItem) {
-				if(stdItem.id == rItem) {
+			$.each(this._selectedData, function(i, item) {
+				if(item.id == rItem) {
 					rItem = item;
 					return false;
 				}
 			});
 		}
 		var res = null;
-		var rStdItem = this.getStdItem(rItem);
-		var i, stdItem;
+		var i, item;
 		for(i = this._selectedData.length - 1; i >= 0; i--) {
-			stdItem = this.getStdItem(this._selectedData[i]);
-			if(stdItem.id == rStdItem.id) {
+			item = this._selectedData[i];
+			if(item.id == rItem.id) {
 				res = this._selectedData.splice(i, 1)[0];
 			}
 		}

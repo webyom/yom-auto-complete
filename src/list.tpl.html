@@ -1,9 +1,8 @@
 <%
 var hasItem = false;
-var getStdItem = $opt.getStdItem;
 var getListItemText = $opt.getListItemText;
 var selectedIdHash = {};
-var i, item, stdItem;
+var i, item;
 %>
 
 <ul class="typeahead dropdown-menu">
@@ -15,8 +14,7 @@ if(list && list.length) {
 			if(!item) {
 				continue;
 			}
-			stdItem = getStdItem(item, 'LIST');
-			selectedIdHash[stdItem.id] = 1;
+			selectedIdHash[item.id] = 1;
 		}
 	}
 	for(i = 0; i < list.length; i++) {
@@ -25,17 +23,16 @@ if(list && list.length) {
 			continue;
 		}
 		hasItem = true;
-		stdItem = getStdItem(item, 'LIST');
 %>
-		<li data-id="<%=stdItem.id%>" data-index="<%=i%>" title="<%==getListItemText ? getListItemText(item, stdItem) : stdItem.name%>" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">
+		<li data-id="<%=item.id%>" data-index="<%=i%>" title="<%==getListItemText ? getListItemText(item) : item.name%>" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">
 			<%if(checkbox) {%>
 				<label class="auto-complete-mockup-checkbox-label">
-					<label class="auto-complete-mockup-checkbox <%=selectedIdHash[stdItem.id] ? 'on' : ''%>"><span></span></label><span>
+					<label class="auto-complete-mockup-checkbox <%=selectedIdHash[item.id] ? 'on' : ''%>"><span></span></label><span>
 			<%}%>
 			<%if(matchedInput) {%>
-				<%=$encodeHtml((getListItemText ? getListItemText(item, stdItem) : stdItem.name).replace(new RegExp('(' + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')%>
+				<%=$encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp('(' + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')%>
 			<%} else {%>
-				<%==getListItemText ? getListItemText(item, stdItem) : stdItem.name%>
+				<%==getListItemText ? getListItemText(item) : item.name%>
 			<%}%>
 			<%if(checkbox) {%>
 				</span></label>

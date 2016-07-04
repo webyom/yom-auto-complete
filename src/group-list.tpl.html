@@ -1,0 +1,61 @@
+<%
+var hasItem = false;
+var getListItemText = $opt.getListItemText;
+var selectedIdHash = {};
+var i, p, item;
+var groups = {};
+
+if (list && list.length) {
+	if (checkbox) {
+		for (i = 0; i < selectedData.length; i++) {
+		item = selectedData[i];
+		if (!item) {
+			continue;
+		}
+		selectedIdHash[item.id] = 1;
+		}
+	}
+	for (i = 0; i < list.length; i++) {
+		item = list[i];
+		if (item) {
+		hasItem = true;
+		item._i = i;
+		groups[item._group] = groups[item._group] || [];
+		groups[item._group].push(item);
+		}
+	}
+}
+%>
+
+<ul class="typeahead dropdown-menu">
+<%
+if (hasItem) {
+	for (p in groups) {
+		list = groups[p];
+%>
+		<h3><i><%==p%></i></h3>
+<%
+		for (i = 0; i < list.length; i++) {
+		item = list[i];
+%>
+		<li data-id="<%=item.id%>" data-index="<%=item._i%>" title="<%==getListItemText ? getListItemText(item) : item.name%>" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">
+			<%if(checkbox) {%>
+			<label class="auto-complete-mockup-checkbox-label">
+				<label class="auto-complete-mockup-checkbox <%=selectedIdHash[item.id] ? 'on' : ''%>"><span></span></label><span>
+			<%}%>
+			<%if(matchedInput) {%>
+			<%=$encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp('(' + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')%>
+			<%} else {%>
+			<%==getListItemText ? getListItemText(item) : item.name%>
+			<%}%>
+			<%if(checkbox) {%>
+			</span></label>
+			<%}%>
+		</a></li>
+<%
+		}
+	}
+} else {%>
+	<li class="disabled"><a><i><%=noResultMsg%></i></a></li>
+<%}%>
+</ul>

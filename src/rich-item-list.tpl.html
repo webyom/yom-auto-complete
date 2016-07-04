@@ -1,13 +1,11 @@
 <div class="auto-complete-rich-box-list">
 <%
-var getStdItem = $opt.getStdItem;
 var getRichItemText = $opt.getRichItemText;
 for(var i = 0, l = list.length; i < l; i++) {
 	var item = list[i];
-	var stdItem = getStdItem(item, 'RICH_BOX');
 %>
-	<span data-id="<%=stdItem.id%>" class="auto-complete-rich-item">
-		<span class="text" style="max-width: <%=maxWidth%>px;" title="<%==getRichItemText ? getRichItemText(item, stdItem) : stdItem.name%>"><%==getRichItemText ? getRichItemText(item, stdItem) : stdItem.name%></span>
+	<span data-id="<%=item.id%>" class="auto-complete-rich-item">
+		<span class="text" style="max-width: <%=maxWidth%>px;" title="<%==getRichItemText ? getRichItemText(item, item) : item.name%>"><%==getRichItemText ? getRichItemText(item, item) : item.name%></span>
 		<i class="icon-remove">×</i>
 	</span>
 <%

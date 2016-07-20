@@ -739,8 +739,8 @@ $.extend(YomAutoComplete.prototype, {
 					_std: true
 				};
 			} else {
-				item.id = item.id || item.name;
-				item.name = item.name || item.id;
+				item.id = item.id || item.key || item.val || item.name;
+				item.name = item.name || item.val || item.key || item.id;
 				item._std = true;
 				return item;
 			}
@@ -849,31 +849,42 @@ $.extend(YomAutoComplete.prototype, {
 			});
 			dataSource = tmp;
 		}
-		if(dataSource && dataSource.length >= 0) {
-			this._dataSource = dataSource.map(function(item) {
-				var stdItem = self.getStdItem(item);
-				if(!stdItem._summary && self._opt.summaryKeys) {
-					var summary = [];
-					$.each(self._opt.summaryKeys, function(i, key) {
-						if(item[key] && typeof item[key] == 'string') {
-							summary.push(item[key]);
-						}
-					});
-					stdItem._summary = summary.join(' - ');
-				}
-				if(stdItem._summary) {
-					var summary = stdItem._summary.replace(/ - /g, '');
-					stdItem._pinyinFull = stdItem._pinyinFull || pinyin.getFullChars(summary);
-					stdItem._pinyinLead = stdItem._pinyinLead || pinyin.getCamelChars(summary);
-				} else if(stdItem.name) {
-					stdItem._pinyinFull = stdItem._pinyinFull || pinyin.getFullChars(stdItem.name);
-					stdItem._pinyinLead = stdItem._pinyinLead || pinyin.getCamelChars(stdItem.name);
-				} else {
-					stdItem._pinyinFull = '';
-					stdItem._pinyinLead = '';
-				}
-				return stdItem;
-			});
+		if(dataSource) {
+			if(!Array.isArray(dataSource) && typeof dataSource == 'object') {
+				dataSource = Object.keys(dataSource).map(function(key) {
+					var name = dataSource[key];
+					if(typeof name != 'string') {
+						name = key;
+					}
+					return {id: key, name: name};
+				});
+			}
+			if(Array.isArray(dataSource) && dataSource.length >= 0) {
+				this._dataSource = dataSource.map(function(item) {
+					var stdItem = self.getStdItem(item);
+					if(!stdItem._summary && self._opt.summaryKeys) {
+						var summary = [];
+						$.each(self._opt.summaryKeys, function(i, key) {
+							if(item[key] && typeof item[key] == 'string') {
+								summary.push(item[key]);
+							}
+						});
+						stdItem._summary = summary.join(' - ');
+					}
+					if(stdItem._summary) {
+						var summary = stdItem._summary.replace(/ - /g, '');
+						stdItem._pinyinFull = stdItem._pinyinFull || pinyin.getFullChars(summary);
+						stdItem._pinyinLead = stdItem._pinyinLead || pinyin.getCamelChars(summary);
+					} else if(stdItem.name) {
+						stdItem._pinyinFull = stdItem._pinyinFull || pinyin.getFullChars(stdItem.name);
+						stdItem._pinyinLead = stdItem._pinyinLead || pinyin.getCamelChars(stdItem.name);
+					} else {
+						stdItem._pinyinFull = '';
+						stdItem._pinyinLead = '';
+					}
+					return stdItem;
+				});
+			}
 		}
 	},
 

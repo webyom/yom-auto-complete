@@ -182,7 +182,7 @@ $.extend(YomAutoComplete.prototype, {
 				} else if(keyCode !== 9) {//tab
 					if(this._checkbox) {
 						this.showFullList();
-					} else {
+					} else if(keyCode !== 16) {
 						this.hideList();
 					}
 				}

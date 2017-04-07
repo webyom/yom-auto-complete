@@ -130,4 +130,4 @@ var pinyin = (function (){
     return new Pinyin(arguments);
 })();
 
-module.exports = pinyin;
+export default pinyin;

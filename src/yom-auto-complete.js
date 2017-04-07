@@ -1,9 +1,10 @@
-var $ = window.jQuery || window.$;
-var listTpl = require('./list.tpl.html');
-var groupListTpl = require('./group-list.tpl.html');
-var richItemListTpl = require('./rich-item-list.tpl.html');
-var pinyin = require('./pinyin');
-require('./yom-auto-complete.less');
+// var $ = require('jquery') || window.jQuery || window.$;
+import $ from 'jquery';
+import listTpl from './list.tpl.html';
+import groupListTpl from './group-list.tpl.html';
+import richItemListTpl from './rich-item-list.tpl.html';
+import pinyin from './pinyin';
+import styleContent from './yom-auto-complete.less';
 
 var YomAutoComplete = function(box, opt) {
 	var self = this;
@@ -974,4 +975,4 @@ $.extend(YomAutoComplete.prototype, {
 
 YomAutoComplete.pinyin = pinyin;
 
-module.exports = YomAutoComplete;
+export default YomAutoComplete;

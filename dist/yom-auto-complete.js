@@ -7,178 +7,158 @@
 $ = 'default' in $ ? $['default'] : $;
 
 function $encodeHtml(str) {
-		return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/`/g, '&#96;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-	}
-	function render($data, $opt) {
-		$data = $data || {};
-		var _$out_= '';
-		var $print = function(str) {_$out_ += str;};
-		
-		
-var list = $data.list,
-	matchedInput = $data.matchedInput,
-	checkbox = $data.checkbox,
-	selectedData = $data.selectedData,
-	noResultMsg = $data.noResultMsg;
+    return (str + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, "&#96;").replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+}
 
-var hasItem = false;
-var getListItemText = $opt.getListItemText;
-var selectedIdHash = {};
-var i, item;
+function render($data, $opt) {
+    $data = $data || {};
+    var _$out_ = "";
+    var $print = function(str) {
+        _$out_ += str;
+    };
+    var list = $data.list, matchedInput = $data.matchedInput, checkbox = $data.checkbox, selectedData = $data.selectedData, noResultMsg = $data.noResultMsg;
+    var hasItem = false;
+    var getListItemText = $opt.getListItemText;
+    var selectedIdHash = {};
+    var i, item;
+    _$out_ += '<ul class="typeahead dropdown-menu">';
+    if (list && list.length) {
+        if (checkbox) {
+            for (i = 0; i < selectedData.length; i++) {
+                item = selectedData[i];
+                if (!item) {
+                    continue;
+                }
+                selectedIdHash[item.id] = 1;
+            }
+        }
+        for (i = 0; i < list.length; i++) {
+            item = list[i];
+            if (!item) {
+                continue;
+            }
+            hasItem = true;
+            _$out_ += '<li data-id="' + item.id + '" data-index="' + i + '" title="' + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">';
+            if (checkbox) {
+                _$out_ += '<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ' + (selectedIdHash[item.id] ? "on" : "") + '"><span></span></label><span>';
+            }
+            if (matchedInput) {
+                _$out_ += "" + $encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp("(" + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>") + "";
+            } else {
+                _$out_ += "" + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + "";
+            }
+            if (checkbox) {
+                _$out_ += "</span></label>";
+            }
+            _$out_ += "</a></li>";
+        }
+        if (!hasItem) {
+            _$out_ += '<li class="disabled"><a><i>' + noResultMsg + "</i></a></li>";
+        }
+    } else {
+        _$out_ += '<li class="disabled"><a><i>' + noResultMsg + "</i></a></li>";
+    }
+    _$out_ += "</ul>";
+    return _$out_;
+}
 
-		_$out_ += '<ul class="typeahead dropdown-menu">';
-		
-if(list && list.length) {
-	if(checkbox) {
-		for(i = 0; i < selectedData.length; i++) {
-			item = selectedData[i];
-			if(!item) {
-				continue;
-			}
-			selectedIdHash[item.id] = 1;
-		}
-	}
-	for(i = 0; i < list.length; i++) {
-		item = list[i];
-		if(!item) {
-			continue;
-		}
-		hasItem = true;
-
-		_$out_ += '<li data-id="' + (item.id) + '" data-index="' + (i) + '" title="' + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">';
-		if(checkbox) {
-		_$out_ += '<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ' + (selectedIdHash[item.id] ? 'on' : '') + '"><span></span></label><span>';
-		}
-		
-		if(matchedInput) {
-		_$out_ += '' + ($encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp('(' + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')) + '';
-		} else {
-		_$out_ += '' + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + '';
-		}
-		
-		if(checkbox) {
-		_$out_ += '</span></label>';
-		}
-		_$out_ += '</a></li>';
-		
-	}
-	if(!hasItem) {
-		_$out_ += '<li class="disabled"><a><i>' + (noResultMsg) + '</i></a></li>';
-		
-	}
-} else {
-		_$out_ += '<li class="disabled"><a><i>' + (noResultMsg) + '</i></a></li>';
-		}
-		_$out_ += '</ul>';
-		return _$out_;
-	}
-var listTpl = {render: render};
+var listTpl = {
+    render: render
+};
 
 function $encodeHtml$1(str) {
-		return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/`/g, '&#96;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-	}
-	function render$1($data, $opt) {
-		$data = $data || {};
-		var _$out_= '';
-		var $print = function(str) {_$out_ += str;};
-		
-		
-var list = $data.list,
-	matchedInput = $data.matchedInput,
-	checkbox = $data.checkbox,
-	selectedData = $data.selectedData,
-	noResultMsg = $data.noResultMsg;
-
-var hasItem = false;
-var getListItemText = $opt.getListItemText;
-var selectedIdHash = {};
-var i, p, item;
-var groups = {};
-
-if (list && list.length) {
-	if (checkbox) {
-		for (i = 0; i < selectedData.length; i++) {
-		item = selectedData[i];
-		if (!item) {
-			continue;
-		}
-		selectedIdHash[item.id] = 1;
-		}
-	}
-	for (i = 0; i < list.length; i++) {
-		item = list[i];
-		if (item) {
-		hasItem = true;
-		item._i = i;
-		groups[item._group] = groups[item._group] || [];
-		groups[item._group].push(item);
-		}
-	}
+    return (str + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, "&#96;").replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 }
 
-		_$out_ += '<ul class="typeahead dropdown-menu">';
-		
-if (hasItem) {
-	for (p in groups) {
-		list = groups[p];
+function render$1($data, $opt) {
+    $data = $data || {};
+    var _$out_ = "";
+    var $print = function(str) {
+        _$out_ += str;
+    };
+    var list = $data.list, matchedInput = $data.matchedInput, checkbox = $data.checkbox, selectedData = $data.selectedData, noResultMsg = $data.noResultMsg;
+    var hasItem = false;
+    var getListItemText = $opt.getListItemText;
+    var selectedIdHash = {};
+    var i, p, item;
+    var groups = {};
+    if (list && list.length) {
+        if (checkbox) {
+            for (i = 0; i < selectedData.length; i++) {
+                item = selectedData[i];
+                if (!item) {
+                    continue;
+                }
+                selectedIdHash[item.id] = 1;
+            }
+        }
+        for (i = 0; i < list.length; i++) {
+            item = list[i];
+            if (item) {
+                hasItem = true;
+                item._i = i;
+                groups[item._group] = groups[item._group] || [];
+                groups[item._group].push(item);
+            }
+        }
+    }
+    _$out_ += '<ul class="typeahead dropdown-menu">';
+    if (hasItem) {
+        for (p in groups) {
+            list = groups[p];
+            _$out_ += "<h3><i>" + $encodeHtml$1(p) + "</i></h3>";
+            for (i = 0; i < list.length; i++) {
+                item = list[i];
+                _$out_ += '<li data-id="' + item.id + '" data-index="' + item._i + '" title="' + $encodeHtml$1(getListItemText ? getListItemText(item) : item.name) + '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">';
+                if (checkbox) {
+                    _$out_ += '<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ' + (selectedIdHash[item.id] ? "on" : "") + '"><span></span></label><span>';
+                }
+                if (matchedInput) {
+                    _$out_ += "" + $encodeHtml$1((getListItemText ? getListItemText(item) : item.name).replace(new RegExp("(" + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>") + "";
+                } else {
+                    _$out_ += "" + $encodeHtml$1(getListItemText ? getListItemText(item) : item.name) + "";
+                }
+                if (checkbox) {
+                    _$out_ += "</span></label>";
+                }
+                _$out_ += "</a></li>";
+            }
+        }
+    } else {
+        _$out_ += '<li class="disabled"><a><i>' + noResultMsg + "</i></a></li>";
+    }
+    _$out_ += "</ul>";
+    return _$out_;
+}
 
-		_$out_ += '<h3><i>' + $encodeHtml$1(p) + '</i></h3>';
-		
-		for (i = 0; i < list.length; i++) {
-		item = list[i];
-
-		_$out_ += '<li data-id="' + (item.id) + '" data-index="' + (item._i) + '" title="' + $encodeHtml$1(getListItemText ? getListItemText(item) : item.name) + '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">';
-		if(checkbox) {
-		_$out_ += '<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ' + (selectedIdHash[item.id] ? 'on' : '') + '"><span></span></label><span>';
-		}
-		
-		if(matchedInput) {
-		_$out_ += '' + ($encodeHtml$1((getListItemText ? getListItemText(item) : item.name).replace(new RegExp('(' + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')) + '';
-		} else {
-		_$out_ += '' + $encodeHtml$1(getListItemText ? getListItemText(item) : item.name) + '';
-		}
-		
-		if(checkbox) {
-		_$out_ += '</span></label>';
-		}
-		_$out_ += '</a></li>';
-		
-		}
-	}
-} else {
-		_$out_ += '<li class="disabled"><a><i>' + (noResultMsg) + '</i></a></li>';
-		}
-		_$out_ += '</ul>';
-		return _$out_;
-	}
-var groupListTpl = {render: render$1};
+var groupListTpl = {
+    render: render$1
+};
 
 function $encodeHtml$2(str) {
-		return (str + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/`/g, '&#96;').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-	}
-	function render$2($data, $opt) {
-		$data = $data || {};
-		var _$out_= '';
-		var $print = function(str) {_$out_ += str;};
-		
-		
-var list = $data.list,
-	maxWidth = $data.maxWidth;
-
-		_$out_ += '<div class="auto-complete-rich-box-list">';
-		
-var getRichItemText = $opt.getRichItemText;
-for(var i = 0, l = list.length; i < l; i++) {
-	var item = list[i];
-
-		_$out_ += '<span data-id="' + (item.id) + '" class="auto-complete-rich-item"><span class="text" style="max-width: ' + (maxWidth) + 'px;" title="' + $encodeHtml$2(getRichItemText ? getRichItemText(item, item) : item.name) + '">' + $encodeHtml$2(getRichItemText ? getRichItemText(item, item) : item.name) + '</span><i class="icon-remove">×</i></span>';
-		
+    return (str + "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/`/g, "&#96;").replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 }
 
-		_$out_ += '</div>';
-		return _$out_;
-	}
-var richItemListTpl = {render: render$2};
+function render$2($data, $opt) {
+    $data = $data || {};
+    var _$out_ = "";
+    var $print = function(str) {
+        _$out_ += str;
+    };
+    var list = $data.list, maxWidth = $data.maxWidth;
+    _$out_ += '<div class="auto-complete-rich-box-list">';
+    var getRichItemText = $opt.getRichItemText;
+    for (var i = 0, l = list.length; i < l; i++) {
+        var item = list[i];
+        _$out_ += '<span data-id="' + item.id + '" class="auto-complete-rich-item"><span class="text" style="max-width: ' + maxWidth + 'px;" title="' + $encodeHtml$2(getRichItemText ? getRichItemText(item, item) : item.name) + '">' + $encodeHtml$2(getRichItemText ? getRichItemText(item, item) : item.name) + '</span><i class="icon-remove">×</i></span>';
+    }
+    _$out_ += "</div>";
+    return _$out_;
+}
+
+var richItemListTpl = {
+    render: render$2
+};
 
 /*!
  * description: Pinyin, to get chinese pinyin from chinese.
@@ -313,22 +293,29 @@ var pinyin = (function (){
 })();
 
 var cssContent = '.auto-complete-list{position:absolute;top:100%;margin-top:2px;margin-bottom:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,.175)}.auto-complete-list>.dropdown-menu{position:static;width:100%;display:block;margin:0;box-shadow:none;float:none}label.auto-complete-mockup-checkbox-label{min-width:80px;max-width:260px;vertical-align:top;font-weight:400;color:#333;margin:0;cursor:pointer;position:relative;line-height:24px;padding-left:28px}label.auto-complete-mockup-checkbox-label label.auto-complete-mockup-checkbox{position:absolute;margin:0;left:0;top:0}label.auto-complete-mockup-checkbox{width:20px;margin:0;overflow:hidden;cursor:pointer}label.auto-complete-mockup-checkbox input{position:absolute;left:-999px}label.auto-complete-mockup-checkbox span{position:relative;display:inline-block;width:18px;height:18px;vertical-align:middle;text-align:center;border:1px solid #888;background-color:#f3f3f3;border-radius:2px}label.auto-complete-mockup-checkbox.disabled{cursor:default}label.auto-complete-mockup-checkbox.disabled span{border:2px solid #ccc}label.auto-complete-mockup-checkbox.on span:before{position:absolute;content:"";display:inline-block;width:8px;height:8px;left:50%;top:50%;margin-left:-4px;margin-top:-4px;background-color:#888;border-radius:2px}li.active label.auto-complete-mockup-checkbox-label{color:#fff}.auto-complete-rich-box-list{cursor:text}.auto-complete-rich-item{border:1px solid #ccc;line-height:24px;padding:2px 6px;margin:2px 0 0 2px;background-color:#f3f3f3;display:inline-block;position:relative;cursor:default;border-radius:2px}.auto-complete-rich-item.active{border:1px solid #888}.auto-complete-rich-item .text{display:inline-block;height:24px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding-right:15px;vertical-align:bottom}.auto-complete-rich-item .icon-remove{cursor:pointer;color:#888;position:absolute;right:2px;top:2px;font-style:normal;font-weight:700;font-size:16px;opacity:.5}.auto-complete-rich-item .icon-remove:hover{opacity:1}';
-var moduleUri = typeof(module) != 'undefined' && module.uri;
-var head = document.head || document.getElementsByTagName('head')[0];
-var styleTagId = 'yom-style-module-inject-tag';
+
+var moduleUri = typeof module != "undefined" && module.uri;
+
+var head = document.head || document.getElementsByTagName("head")[0];
+
+var styleTagId = "yom-style-module-inject-tag";
+
 var styleTag = document.getElementById(styleTagId);
+
 if (!styleTag) {
-	styleTag = document.createElement('style');
-	styleTag.id = styleTagId;
-	styleTag.type = 'text/css';
-	styleTag = head.appendChild(styleTag);
+    styleTag = document.createElement("style");
+    styleTag.id = styleTagId;
+    styleTag.type = "text/css";
+    styleTag = head.appendChild(styleTag);
 }
+
 window._yom_style_module_injected = window._yom_style_module_injected || {};
+
 if (!moduleUri) {
-	styleTag.appendChild(document.createTextNode(cssContent + '\n'));
-} else if(!window._yom_style_module_injected[moduleUri]) {
-	styleTag.appendChild(document.createTextNode('/* ' + moduleUri + ' */\n' + cssContent + '\n'));
-	window._yom_style_module_injected[moduleUri] = 1;
+    styleTag.appendChild(document.createTextNode(cssContent + "\n"));
+} else if (!window._yom_style_module_injected[moduleUri]) {
+    styleTag.appendChild(document.createTextNode("/* " + moduleUri + " */\n" + cssContent + "\n"));
+    window._yom_style_module_injected[moduleUri] = 1;
 }
 
 // var $ = require('jquery') || window.jQuery || window.$;

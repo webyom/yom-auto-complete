@@ -261,6 +261,10 @@ $.extend(YomAutoComplete.prototype, {
 			clearTimeout(this._toRefBlurHide);
 			this._toRefBlurHide = null;
 			$(document).on('click', function bodyClickHide(evt) {
+				if(!self._box) {
+					$(document).off('click', bodyClickHide);
+					return;
+				}
 				if(self._box.parent().find($(evt.target).closest('[data-type^="auto-complete"]')).length) {
 					return;
 				}

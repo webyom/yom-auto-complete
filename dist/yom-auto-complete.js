@@ -485,7 +485,9 @@ $.extend(YomAutoComplete.prototype, {
 			toBeMatchedInput = this._getToBeMatchedInput();
 			if(toBeMatchedInput && !this._opt.disableFilter) {
 				this._toRefMatch = setTimeout(function() {
-					self._getMatchedList(toBeMatchedInput);
+					self._getMatchedList(toBeMatchedInput, function(data) {
+						self.renderList(data, {matchedInput: toBeMatchedInput});
+					});
 				}, 300);
 			} else {
 				if(!(keyCode === 8 || keyCode === 46) && !this._freeInput && this._separator && new RegExp(this._getRegExpSeperator() + '\\s*$').test(boxValue)) {

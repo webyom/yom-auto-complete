@@ -11,7 +11,7 @@ var selectedIdHash = {};
 var i, item;
 %>
 
-<ul class="typeahead dropdown-menu">
+<ul class="dropdown-menu">
 <%
 if(list && list.length) {
 	if(checkbox) {
@@ -30,20 +30,26 @@ if(list && list.length) {
 		}
 		hasItem = true;
 %>
-		<li data-id="<%=item.id%>" data-index="<%=i%>" title="<%==getListItemText ? getListItemText(item) : item.name%>" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">
-			<%if(checkbox) {%>
-				<label class="auto-complete-mockup-checkbox-label">
-					<label class="auto-complete-mockup-checkbox <%=selectedIdHash[item.id] ? 'on' : ''%>"><span></span></label><span>
-			<%}%>
-			<%if(matchedInput) {%>
-				<%=$encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp('(' + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')%>
-			<%} else {%>
-				<%==getListItemText ? getListItemText(item) : item.name%>
-			<%}%>
-			<%if(checkbox) {%>
-				</span></label>
-			<%}%>
-		</a></li>
+		<li data-id="<%=item.id%>" data-index="<%=i%>" title="<%==getListItemText ? getListItemText(item) : item.name%>" style="text-overflow: ellipsis; overflow: hidden;">
+			<a href="javascript:void(0);" onclick="return false;">
+				<%if(checkbox) {%>
+					<label class="auto-complete-mockup-checkbox-label">
+						<span class="auto-complete-mockup-checkbox <%=selectedIdHash[item.id] ? 'on' : ''%>">
+							<span></span>
+						</span>
+						<span>
+				<%}%>
+							<%if(matchedInput) {%>
+								<%=$encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp('(' + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, '\\$&') + ')', 'ig'), '{{__AC_HL_START__}}$1{{__AC_HL_END__}}')).replace(/\{\{__AC_HL_START__\}\}/g, '<strong>').replace(/\{\{__AC_HL_END__\}\}/g, '</strong>')%>
+							<%} else {%>
+								<%==getListItemText ? getListItemText(item) : item.name%>
+							<%}%>
+				<%if(checkbox) {%>
+						</span>
+					</label>
+				<%}%>
+			</a>
+		</li>
 <%
 	}
 	if(!hasItem) {%>

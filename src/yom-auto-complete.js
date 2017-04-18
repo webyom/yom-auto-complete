@@ -207,8 +207,12 @@ $.extend(YomAutoComplete.prototype, {
 			.on('keyup', this._bind.keyup);
 		$('.dropdown-menu', this._list).on('scroll', this._bind.scroll);
 		this._list.delegate('li[data-index] a', 'click', function(evt) {
+			var aEl = evt.currentTarget;
 			var i = parseInt($(evt.target).closest('li[data-index]').attr('data-index'));
-			setTimeout(function() {//make sure the blur event of input box occurs first
+			setTimeout(function() {// make sure the blur event of input box occurs first
+				try {
+					aEl.blur(); // remove focus style
+				} catch(e) {}
 				self._selectItem(i);
 			}, 0);
 		}).delegate('li[data-index] a', 'mouseover', function(evt) {

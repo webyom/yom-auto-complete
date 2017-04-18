@@ -21,7 +21,7 @@ function render($data, $opt) {
     var getListItemText = $opt.getListItemText;
     var selectedIdHash = {};
     var i, item;
-    _$out_ += '<ul class="typeahead dropdown-menu">';
+    _$out_ += '<ul class="dropdown-menu">';
     if (list && list.length) {
         if (checkbox) {
             for (i = 0; i < selectedData.length; i++) {
@@ -40,7 +40,7 @@ function render($data, $opt) {
             hasItem = true;
             _$out_ += '<li data-id="' + item.id + '" data-index="' + i + '" title="' + $encodeHtml(getListItemText ? getListItemText(item) : item.name) + '" style="text-overflow: ellipsis; overflow: hidden;"><a href="javascript:void(0);" onclick="return false;">';
             if (checkbox) {
-                _$out_ += '<label class="auto-complete-mockup-checkbox-label"><label class="auto-complete-mockup-checkbox ' + (selectedIdHash[item.id] ? "on" : "") + '"><span></span></label><span>';
+                _$out_ += '<label class="auto-complete-mockup-checkbox-label"><span class="auto-complete-mockup-checkbox ' + (selectedIdHash[item.id] ? "on" : "") + '"><span></span></span><span>';
             }
             if (matchedInput) {
                 _$out_ += "" + $encodeHtml((getListItemText ? getListItemText(item) : item.name).replace(new RegExp("(" + matchedInput.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&") + ")", "ig"), "{{__AC_HL_START__}}$1{{__AC_HL_END__}}")).replace(/\{\{__AC_HL_START__\}\}/g, "<strong>").replace(/\{\{__AC_HL_END__\}\}/g, "</strong>") + "";
@@ -292,7 +292,7 @@ var pinyin = (function (){
     return new Pinyin(arguments);
 })();
 
-var cssContent = '.auto-complete-list{position:absolute;top:100%;margin-top:2px;margin-bottom:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,.175)}.auto-complete-list>.dropdown-menu{position:static;width:100%;display:block;margin:0;box-shadow:none;float:none}label.auto-complete-mockup-checkbox-label{min-width:80px;max-width:260px;vertical-align:top;font-weight:400;color:#333;margin:0;cursor:pointer;position:relative;line-height:24px;padding-left:28px}label.auto-complete-mockup-checkbox-label label.auto-complete-mockup-checkbox{position:absolute;margin:0;left:0;top:0}label.auto-complete-mockup-checkbox{width:20px;margin:0;overflow:hidden;cursor:pointer}label.auto-complete-mockup-checkbox input{position:absolute;left:-999px}label.auto-complete-mockup-checkbox span{position:relative;display:inline-block;width:18px;height:18px;vertical-align:middle;text-align:center;border:1px solid #888;background-color:#f3f3f3;border-radius:2px}label.auto-complete-mockup-checkbox.disabled{cursor:default}label.auto-complete-mockup-checkbox.disabled span{border:2px solid #ccc}label.auto-complete-mockup-checkbox.on span:before{position:absolute;content:"";display:inline-block;width:8px;height:8px;left:50%;top:50%;margin-left:-4px;margin-top:-4px;background-color:#888;border-radius:2px}li.active label.auto-complete-mockup-checkbox-label{color:#fff}.auto-complete-rich-box-list{cursor:text}.auto-complete-rich-item{border:1px solid #ccc;line-height:24px;padding:2px 6px;margin:2px 0 0 2px;background-color:#f3f3f3;display:inline-block;position:relative;cursor:default;border-radius:2px}.auto-complete-rich-item.active{border:1px solid #888}.auto-complete-rich-item .text{display:inline-block;height:24px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding-right:15px;vertical-align:bottom}.auto-complete-rich-item .icon-remove{cursor:pointer;color:#888;position:absolute;right:2px;top:2px;font-style:normal;font-weight:700;font-size:16px;opacity:.5}.auto-complete-rich-item .icon-remove:hover{opacity:1}';
+var cssContent = '.auto-complete-list{position:absolute;top:100%;margin-top:2px;margin-bottom:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,.175)}.auto-complete-list>.dropdown-menu{position:static;width:100%;display:block;margin:0;box-shadow:none;float:none}.auto-complete-mockup-checkbox-label{min-width:80px;max-width:260px;vertical-align:top;font-weight:400;margin:0;cursor:pointer;position:relative;line-height:24px;padding-left:28px}.auto-complete-mockup-checkbox{position:absolute;left:0;top:0;width:20px;margin:0;overflow:hidden;cursor:pointer}.auto-complete-mockup-checkbox>span{position:relative;display:inline-block;width:18px;height:18px;vertical-align:middle;text-align:center;border:1px solid #888;background-color:#f3f3f3;border-radius:2px}.auto-complete-mockup-checkbox.disabled{cursor:default}.auto-complete-mockup-checkbox.disabled>span{border:2px solid #ccc}.auto-complete-mockup-checkbox.on>span:before{position:absolute;content:"";display:inline-block;width:8px;height:8px;left:50%;top:50%;margin-left:-4px;margin-top:-4px;background-color:#888;border-radius:2px}.auto-complete-rich-box-list{cursor:text}.auto-complete-rich-item{border:1px solid #ccc;line-height:24px;padding:2px 6px;margin:2px 0 0 2px;background-color:#f3f3f3;display:inline-block;position:relative;cursor:default;border-radius:2px}.auto-complete-rich-item.active{border:1px solid #888}.auto-complete-rich-item .text{display:inline-block;height:24px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding-right:15px;vertical-align:bottom}.auto-complete-rich-item .icon-remove{cursor:pointer;color:#888;position:absolute;right:2px;top:2px;font-style:normal;font-weight:700;font-size:16px;opacity:.5}.auto-complete-rich-item .icon-remove:hover{opacity:1}';
 
 var moduleUri = typeof module != "undefined" && module.uri;
 
@@ -520,8 +520,12 @@ $.extend(YomAutoComplete.prototype, {
 			.on('keyup', this._bind.keyup);
 		$('.dropdown-menu', this._list).on('scroll', this._bind.scroll);
 		this._list.delegate('li[data-index] a', 'click', function(evt) {
+			var aEl = evt.currentTarget;
 			var i = parseInt($(evt.target).closest('li[data-index]').attr('data-index'));
-			setTimeout(function() {//make sure the blur event of input box occurs first
+			setTimeout(function() {// make sure the blur event of input box occurs first
+				try {
+					aEl.blur(); // remove focus style
+				} catch(e) {}
 				self._selectItem(i);
 			}, 0);
 		}).delegate('li[data-index] a', 'mouseover', function(evt) {

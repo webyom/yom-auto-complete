@@ -15,35 +15,29 @@
 	}
 }
 
-label.auto-complete-mockup-checkbox-label {
+.auto-complete-mockup-checkbox-label {
 	line-height: 30px;
 	min-width: 80px;
 	max-width: 260px;
 	vertical-align: top;
 	font-weight: normal;
-	color: #333;
 	margin: 0;
 	cursor: pointer;
 	position: relative;
 	line-height: 24px;
 	padding-left: 28px;
-	label.auto-complete-mockup-checkbox {
-		position: absolute;
-		margin: 0;
-		left: 0;
-		top: 0;
-	}
 }
-label.auto-complete-mockup-checkbox {
+
+.auto-complete-mockup-checkbox {
+	position: absolute;
+	margin: 0;
+	left: 0;
+	top: 0;
 	width: 20px;
 	margin: 0;
 	overflow: hidden;
 	cursor: pointer;
-	input {
-		position: absolute;
-		left: -999px;
-	}
-	span {
+	> span {
 		position: relative;
 		display: inline-block;
 		width: 18px;
@@ -56,28 +50,23 @@ label.auto-complete-mockup-checkbox {
 	}
 	&.disabled {
 		cursor: default;
-		span {
+		> span {
 			border: solid 2px #ccc;
 		}
 	}
-}
-label.auto-complete-mockup-checkbox.on {
-	span:before {
-		position: absolute;
-		content: "";
-		display: inline-block;
-		width: 8px;
-		height: 8px;
-		left: 50%;
-		top: 50%;
-		margin-left: -4px;
-		margin-top: -4px;
-		background-color: #888;
-		border-radius: 2px;
-	}
-}
-li.active {
-	label.auto-complete-mockup-checkbox-label {
-		color: #fff;
+	&.on {
+		> span:before {
+			position: absolute;
+			content: "";
+			display: inline-block;
+			width: 8px;
+			height: 8px;
+			left: 50%;
+			top: 50%;
+			margin-left: -4px;
+			margin-top: -4px;
+			background-color: #888;
+			border-radius: 2px;
+		}
 	}
 }

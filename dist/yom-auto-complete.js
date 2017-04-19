@@ -1134,7 +1134,12 @@ $.extend(YomAutoComplete.prototype, {
 
 	setSelectedData: function(dataList) {
 		var self = this;
-		if(this._dataSource && dataList && this._opt.mustSelectInDataSource !== false) {
+		if(this._freeInput) {
+			this._box.val(((dataList || []).concat(this._maxSelection > 1 ? [''] : [])).map(function(item) {
+				item = self.getStdItem(item);
+				return item.name;
+			}).join(this._separator));
+		} else if(this._dataSource && dataList && this._opt.mustSelectInDataSource !== false) {
 			this._selectedData = this._dataSource.filter(function(item) {
 				return dataList.some(function(initItem) {
 					var stdInitItem = self.getStdItem(initItem);

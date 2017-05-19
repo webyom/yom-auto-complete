@@ -1,6 +1,6 @@
 {
   "name": "yom-auto-complete",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "An auto complete widget.",
   "keywords": [
     "form util"

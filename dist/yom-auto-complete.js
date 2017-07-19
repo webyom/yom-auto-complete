@@ -347,13 +347,14 @@ var YomAutoComplete = function(box, opt) {
 	this._toRefFocus = null;
 	this._toRefBlurHide = null;
 	this._bind = {
+		clickDocument: function(evt) {return self._onClickDocument(evt);},
 		click: function(evt) {return self._onClick(evt);},
 		focus: function(evt) {return self._onFocus(evt);},
 		blur: function(evt) {return self._onBlur(evt);},
 		keydown: function(evt) {return self._onKeydown(evt);},
 		keypress: function(evt) {return self._onKeypress(evt);},
 		keyup: function(evt) {return self._onKeyup(evt);},
-		scroll: function(evt) {return self._cancelBlurHide();}
+		scroll: function(evt) {return self._onScroll(evt);}
 	};
 	this.setDataSource(opt.dataSource);
 	this._init();
@@ -511,6 +512,22 @@ $.extend(YomAutoComplete.prototype, {
 		}
 	},
 
+	_onScroll: function(evt) {
+		clearTimeout(this._toRefBlurHide);
+	},
+
+	_onClickDocument: function(evt) {
+		if(!this._box || evt.target == this._box[0] || !this.isListShown()) {
+			return;
+		}
+		var el = this._box.parent().find($(evt.target).closest('[data-type^="auto-complete"]'))[0];
+		if(el && (el == this._richBox[0] || el == this._list[0])) {
+			return;
+		}
+		this._syncFromDataList();
+		this.hideList();
+	},
+
 	_bindEvent: function() {
 		var self = this;
 		this._box
@@ -557,6 +574,7 @@ $.extend(YomAutoComplete.prototype, {
 				}, 0);
 			});
 		}
+		$(document).on('click', this._bind.clickDocument);
 	},
 
 	_unbindEvent: function() {
@@ -572,28 +590,7 @@ $.extend(YomAutoComplete.prototype, {
 		if(this._richBox) {
 			this._richBox.undelegate();
 		}
-	},
-
-	_cancelBlurHide: function() {
-		var self = this;
-		if(this._toRefBlurHide) {
-			clearTimeout(this._toRefBlurHide);
-			this._toRefBlurHide = null;
-			$(document).on('click', function bodyClickHide(evt) {
-				if(!self._box) {
-					$(document).off('click', bodyClickHide);
-					return;
-				}
-				if(self._box.parent().find($(evt.target).closest('[data-type^="auto-complete"]')).length) {
-					return;
-				}
-				$(document).off('click', bodyClickHide);
-				if(evt.target != self._box[0]) {
-					self._syncFromDataList();
-					self.hideList();
-				}
-			});
-		}
+		$(document).off('click', this._bind.clickDocument);
 	},
 
 	_getRegExpSeperator: function() {
@@ -921,7 +918,7 @@ $.extend(YomAutoComplete.prototype, {
 			checkbox = $('[data-id="' + item.id + '"] .auto-complete-mockup-checkbox', this._list);
 		}
 		if(checkbox && checkbox.length) {
-			this._cancelBlurHide();
+			clearTimeout(this._toRefBlurHide);
 			if(checkbox.hasClass('on')) {
 				this.removeSelectedItem(item);
 				checkbox.removeClass('on');

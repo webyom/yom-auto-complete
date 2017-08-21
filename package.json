@@ -1,6 +1,6 @@
 {
   "name": "yom-auto-complete",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "An auto complete widget.",
   "keywords": [
     "form util"
@@ -31,6 +31,6 @@
   },
   "devDependencies": {
     "rollup": "^0.41.6",
-    "rollup-plugin-mt2amd": "^1.0.3"
+    "rollup-plugin-mt2amd": "^1.3.0"
   }
 }

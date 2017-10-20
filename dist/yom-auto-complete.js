@@ -546,7 +546,7 @@ $.extend(YomAutoComplete.prototype, {
 			return;
 		}
 		var el = this._box.parent().find($(evt.target).closest('[data-type^="auto-complete"]'))[0];
-		if(el && (el == this._richBox[0] || el == this._list[0])) {
+		if(el && (el == (this._richBox && this._richBox[0]) || el == this._list[0])) {
 			return;
 		}
 		this._syncFromDataList();

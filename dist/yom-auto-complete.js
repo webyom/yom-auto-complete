@@ -302,6 +302,18 @@ var pinyin = (function () {
     return new Pinyin(arguments);
 })();
 
+var i18n = {
+	'en': {
+		noResult: 'No result',
+		pleaseInput: 'Please input...'
+	},
+
+	'zh-CN': {
+		noResult: '找不到结果',
+		pleaseInput: '请输入...'
+	}
+};
+
 function yomCssModuleHelper(className, cssContent, moduleUri) {
     var head = document.head || document.getElementsByTagName("head")[0];
     var styleTagId = "yom-style-module-inject-tag";
@@ -353,16 +365,16 @@ var moduleUri = typeof module != "undefined" && module.uri;
 
 var expo = yomCssModuleHelper("", '.auto-complete-list{position:absolute;top:100%;margin-top:2px;margin-bottom:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,.175)}.auto-complete-list>.dropdown-menu{position:static;width:100%;display:block;margin:0;box-shadow:none;float:none}.auto-complete-mockup-checkbox-label{min-width:80px;max-width:260px;vertical-align:top;font-weight:400;margin:0;cursor:pointer;position:relative;line-height:24px;padding-left:28px}.auto-complete-mockup-checkbox{position:absolute;left:0;top:0;width:20px;margin:0;overflow:hidden;cursor:pointer}.auto-complete-mockup-checkbox>span{position:relative;display:inline-block;width:18px;height:18px;vertical-align:middle;text-align:center;border:1px solid #888;background-color:#f3f3f3;border-radius:2px}.auto-complete-mockup-checkbox.disabled{cursor:default}.auto-complete-mockup-checkbox.disabled>span{border:2px solid #ccc}.auto-complete-mockup-checkbox.on>span:before{position:absolute;content:"";display:inline-block;width:8px;height:8px;left:50%;top:50%;margin-left:-4px;margin-top:-4px;background-color:#888;border-radius:2px}.auto-complete-rich-box-list{cursor:text}.auto-complete-rich-item{border:1px solid #ccc;line-height:24px;padding:2px 6px;margin:2px 0 0 2px;background-color:#f3f3f3;display:inline-block;position:relative;cursor:default;border-radius:2px}.auto-complete-rich-item.active{border:1px solid #888}.auto-complete-rich-item .text{display:inline-block;height:24px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding-right:15px;vertical-align:bottom}.auto-complete-rich-item .icon-remove{cursor:pointer;color:#888;position:absolute;right:2px;top:2px;font-style:normal;font-weight:700;font-size:16px;opacity:.5}.auto-complete-rich-item .icon-remove:hover{opacity:1}', moduleUri);
 
-// var $ = require('jquery') || window.jQuery || window.$;
 var YomAutoComplete = function(box, opt) {
 	var self = this;
 	opt = opt || {};
 	this._opt = opt;
+	this._i18n = i18n[opt.language] || i18n['en'];
 	this._box = $(box);
 	this._richBox = null;
 	this._list = null;
 	this._maxSelection = opt.maxSelection > 0 ? parseInt(opt.maxSelection) : 9999;
-	this._listMaxLength = opt.listMaxLength > 0 ? opt.listMaxLength : 10;
+	this._listMaxLength = opt.listMaxLength > 0 ? opt.listMaxLength : 100;
 	this._listMaxHeight = opt.listMaxHeight > 0 ? opt.listMaxHeight : 260;
 	this._freeInput = !!opt.freeInput;
 	this._richSelectionResult = !opt.freeInput && opt.richSelectionResult;
@@ -996,23 +1008,20 @@ $.extend(YomAutoComplete.prototype, {
 		}
 	},
 
-	_hasAnyOtherListShown: function() {
-		return !this.isListShown() && !!$('[data-type="auto-complete"]:visible', this._box.parent()).length;
-	},
-
 	_renderList: function(dataList, opt) {
 		opt = opt || {};
 		var self = this;
 		var listTpl$$1 = opt.listTpl || this._listTpl;
 		var matchedInput = opt.matchedInput || '';
 		var isFullList = opt.isFullList;
-		var noResultMsg = opt.noResultMsg || this._opt.noResultMsg || 'No Matches';
 		var autoSelect = opt.autoSelect || this._opt.autoSelect;
-		var filteredList, listLen;
-		if(dataList && dataList.length) {
-			if(this._hasAnyOtherListShown()) {
-				return;
-			}
+		var filteredList, listLen, noResultMsg;
+		if(!dataList) {//hide
+			this._previousListData = this._currentListData;
+			this._currentListData = null;
+			this._list.html('').hide();
+		} else if(dataList.length) {
+			noResultMsg = this._i18n.noResult;
 			if(this._excludeExist && !isFullList) {
 				filteredList = [];
 				$.each(dataList, function(i, item) {
@@ -1029,6 +1038,9 @@ $.extend(YomAutoComplete.prototype, {
 					}
 				});
 				this._currentListData = filteredList;
+			} else if(isFullList && dataList.length > this._listMaxLength) {
+				this._currentListData = [];
+				noResultMsg = this._i18n.pleaseInput;
 			} else {
 				this._currentListData = dataList.map(function(item) {
 					return self.getStdItem(item);
@@ -1063,16 +1075,18 @@ $.extend(YomAutoComplete.prototype, {
 					noResultMsg: noResultMsg
 				}, {})).show();
 			}
-		} else if(dataList && !this._hasAnyOtherListShown() && (this._opt.noResultMsg !== '' || opt.noResultMsg) && (!this._freeInput || opt.noResultMsg)) {
+		} else if(opt.noResultMsg) {
 			this._currentListData = [];
 			this._list.html(listTpl$$1.render({
 				list: [],
-				noResultMsg: noResultMsg
+				noResultMsg: opt.noResultMsg
 			}, {})).show();
-		} else {//hide
-			this._previousListData = this._currentListData;
-			this._currentListData = null;
-			this._list.html('').hide();
+		} else if(!this._freeInput) {
+			this._currentListData = [];
+			this._list.html(listTpl$$1.render({
+				list: [],
+				noResultMsg: this._i18n.noResult
+			}, {})).show();
 		}
 		this._currentListIndex = 0;
 		return this;

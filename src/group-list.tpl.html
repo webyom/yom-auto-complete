@@ -14,20 +14,20 @@ var groups = {};
 if (list && list.length) {
 	if (checkbox) {
 		for (i = 0; i < selectedData.length; i++) {
-		item = selectedData[i];
-		if (!item) {
-			continue;
-		}
-		selectedIdHash[item.id] = 1;
+			item = selectedData[i];
+			if (!item) {
+				continue;
+			}
+			selectedIdHash[item.id] = 1;
 		}
 	}
 	for (i = 0; i < list.length; i++) {
 		item = list[i];
 		if (item) {
-		hasItem = true;
-		item._i = i;
-		groups[item._group] = groups[item._group] || [];
-		groups[item._group].push(item);
+			hasItem = true;
+			item._i = i;
+			groups[item._group] = groups[item._group] || [];
+			groups[item._group].push(item);
 		}
 	}
 }

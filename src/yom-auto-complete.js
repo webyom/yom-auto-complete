@@ -1,20 +1,21 @@
-// var $ = require('jquery') || window.jQuery || window.$;
 import $ from 'jquery';
 import listTpl from './list.tpl.html';
 import groupListTpl from './group-list.tpl.html';
 import richItemListTpl from './rich-item-list.tpl.html';
 import pinyin from './pinyin';
+import i18n from './i18n';
 import styleContent from './yom-auto-complete.less';
 
 var YomAutoComplete = function(box, opt) {
 	var self = this;
 	opt = opt || {};
 	this._opt = opt;
+	this._i18n = i18n[opt.language] || i18n['en'];
 	this._box = $(box);
 	this._richBox = null;
 	this._list = null;
 	this._maxSelection = opt.maxSelection > 0 ? parseInt(opt.maxSelection) : 9999;
-	this._listMaxLength = opt.listMaxLength > 0 ? opt.listMaxLength : 10;
+	this._listMaxLength = opt.listMaxLength > 0 ? opt.listMaxLength : 100;
 	this._listMaxHeight = opt.listMaxHeight > 0 ? opt.listMaxHeight : 260;
 	this._freeInput = !!opt.freeInput;
 	this._richSelectionResult = !opt.freeInput && opt.richSelectionResult;
@@ -648,23 +649,20 @@ $.extend(YomAutoComplete.prototype, {
 		}
 	},
 
-	_hasAnyOtherListShown: function() {
-		return !this.isListShown() && !!$('[data-type="auto-complete"]:visible', this._box.parent()).length;
-	},
-
 	_renderList: function(dataList, opt) {
 		opt = opt || {};
 		var self = this;
 		var listTpl = opt.listTpl || this._listTpl;
 		var matchedInput = opt.matchedInput || '';
 		var isFullList = opt.isFullList;
-		var noResultMsg = opt.noResultMsg || this._opt.noResultMsg || 'No Matches';
 		var autoSelect = opt.autoSelect || this._opt.autoSelect;
-		var filteredList, listLen;
-		if(dataList && dataList.length) {
-			if(this._hasAnyOtherListShown()) {
-				return;
-			}
+		var filteredList, listLen, noResultMsg;
+		if(!dataList) {//hide
+			this._previousListData = this._currentListData;
+			this._currentListData = null;
+			this._list.html('').hide();
+		} else if(dataList.length) {
+			noResultMsg = this._i18n.noResult;
 			if(this._excludeExist && !isFullList) {
 				filteredList = [];
 				$.each(dataList, function(i, item) {
@@ -681,6 +679,9 @@ $.extend(YomAutoComplete.prototype, {
 					}
 				});
 				this._currentListData = filteredList;
+			} else if(isFullList && dataList.length > this._listMaxLength) {
+				this._currentListData = [];
+				noResultMsg = this._i18n.pleaseInput;
 			} else {
 				this._currentListData = dataList.map(function(item) {
 					return self.getStdItem(item);
@@ -715,16 +716,18 @@ $.extend(YomAutoComplete.prototype, {
 					noResultMsg: noResultMsg
 				}, {})).show();
 			}
-		} else if(dataList && !this._hasAnyOtherListShown() && (this._opt.noResultMsg !== '' || opt.noResultMsg) && (!this._freeInput || opt.noResultMsg)) {
+		} else if(opt.noResultMsg) {
 			this._currentListData = [];
 			this._list.html(listTpl.render({
 				list: [],
-				noResultMsg: noResultMsg
+				noResultMsg: opt.noResultMsg
 			}, {})).show();
-		} else {//hide
-			this._previousListData = this._currentListData;
-			this._currentListData = null;
-			this._list.html('').hide();
+		} else if(!this._freeInput) {
+			this._currentListData = [];
+			this._list.html(listTpl.render({
+				list: [],
+				noResultMsg: this._i18n.noResult
+			}, {})).show();
 		}
 		this._currentListIndex = 0;
 		return this;

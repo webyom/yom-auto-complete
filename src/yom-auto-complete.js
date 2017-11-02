@@ -681,7 +681,7 @@ $.extend(YomAutoComplete.prototype, {
 				this._currentListData = filteredList;
 			} else if(isFullList && dataList.length > this._listMaxLength) {
 				this._currentListData = [];
-				noResultMsg = this._i18n.pleaseInput;
+				noResultMsg = this._i18n.pleaseInput.replace('{1}', dataList.length);
 			} else {
 				this._currentListData = dataList.map(function(item) {
 					return self.getStdItem(item);

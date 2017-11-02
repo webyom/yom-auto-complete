@@ -305,12 +305,12 @@ var pinyin = (function () {
 var i18n = {
 	'en': {
 		noResult: 'No result',
-		pleaseInput: 'Please input...'
+		pleaseInput: '{1} records, please input search criteria...'
 	},
 
 	'zh-CN': {
 		noResult: '找不到结果',
-		pleaseInput: '请输入...'
+		pleaseInput: '{1}条记录，请输入查询条件...'
 	}
 };
 
@@ -363,7 +363,7 @@ function yomCssModuleHelper(className, cssContent, moduleUri) {
 
 var moduleUri = typeof module != "undefined" && module.uri;
 
-var expo = yomCssModuleHelper("", '.auto-complete-list{position:absolute;top:100%;margin-top:2px;margin-bottom:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,.175)}.auto-complete-list>.dropdown-menu{position:static;width:100%;display:block;margin:0;box-shadow:none;float:none}.auto-complete-mockup-checkbox-label{min-width:80px;max-width:260px;vertical-align:top;font-weight:400;margin:0;cursor:pointer;position:relative;line-height:24px;padding-left:28px}.auto-complete-mockup-checkbox{position:absolute;left:0;top:0;width:20px;margin:0;overflow:hidden;cursor:pointer}.auto-complete-mockup-checkbox>span{position:relative;display:inline-block;width:18px;height:18px;vertical-align:middle;text-align:center;border:1px solid #888;background-color:#f3f3f3;border-radius:2px}.auto-complete-mockup-checkbox.disabled{cursor:default}.auto-complete-mockup-checkbox.disabled>span{border:2px solid #ccc}.auto-complete-mockup-checkbox.on>span:before{position:absolute;content:"";display:inline-block;width:8px;height:8px;left:50%;top:50%;margin-left:-4px;margin-top:-4px;background-color:#888;border-radius:2px}.auto-complete-rich-box-list{cursor:text}.auto-complete-rich-item{border:1px solid #ccc;line-height:24px;padding:2px 6px;margin:2px 0 0 2px;background-color:#f3f3f3;display:inline-block;position:relative;cursor:default;border-radius:2px}.auto-complete-rich-item.active{border:1px solid #888}.auto-complete-rich-item .text{display:inline-block;height:24px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding-right:15px;vertical-align:bottom}.auto-complete-rich-item .icon-remove{cursor:pointer;color:#888;position:absolute;right:2px;top:2px;font-style:normal;font-weight:700;font-size:16px;opacity:.5}.auto-complete-rich-item .icon-remove:hover{opacity:1}', moduleUri);
+var expo = yomCssModuleHelper("", '.auto-complete-list{position:absolute;top:100%;margin-top:2px;margin-bottom:10px;z-index:1000;box-shadow:0 6px 12px rgba(0,0,0,.175)}.auto-complete-list>.dropdown-menu{position:static;width:100%;display:block;margin:0;box-shadow:none;float:none}.auto-complete-list>.dropdown-menu>li>a{white-space:normal}.auto-complete-mockup-checkbox-label{min-width:80px;max-width:260px;vertical-align:top;font-weight:400;margin:0;cursor:pointer;position:relative;line-height:24px;padding-left:28px}.auto-complete-mockup-checkbox{position:absolute;left:0;top:0;width:20px;margin:0;overflow:hidden;cursor:pointer}.auto-complete-mockup-checkbox>span{position:relative;display:inline-block;width:18px;height:18px;vertical-align:middle;text-align:center;border:1px solid #888;background-color:#f3f3f3;border-radius:2px}.auto-complete-mockup-checkbox.disabled{cursor:default}.auto-complete-mockup-checkbox.disabled>span{border:2px solid #ccc}.auto-complete-mockup-checkbox.on>span:before{position:absolute;content:"";display:inline-block;width:8px;height:8px;left:50%;top:50%;margin-left:-4px;margin-top:-4px;background-color:#888;border-radius:2px}.auto-complete-rich-box-list{cursor:text}.auto-complete-rich-item{border:1px solid #ccc;line-height:24px;padding:2px 6px;margin:2px 0 0 2px;background-color:#f3f3f3;display:inline-block;position:relative;cursor:default;border-radius:2px}.auto-complete-rich-item.active{border:1px solid #888}.auto-complete-rich-item .text{display:inline-block;height:24px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;padding-right:15px;vertical-align:bottom}.auto-complete-rich-item .icon-remove{cursor:pointer;color:#888;position:absolute;right:2px;top:2px;font-style:normal;font-weight:700;font-size:16px;opacity:.5}.auto-complete-rich-item .icon-remove:hover{opacity:1}', moduleUri);
 
 var YomAutoComplete = function(box, opt) {
 	var self = this;
@@ -1040,7 +1040,7 @@ $.extend(YomAutoComplete.prototype, {
 				this._currentListData = filteredList;
 			} else if(isFullList && dataList.length > this._listMaxLength) {
 				this._currentListData = [];
-				noResultMsg = this._i18n.pleaseInput;
+				noResultMsg = this._i18n.pleaseInput.replace('{1}', dataList.length);
 			} else {
 				this._currentListData = dataList.map(function(item) {
 					return self.getStdItem(item);

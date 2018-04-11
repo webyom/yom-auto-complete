@@ -1,10 +1,11 @@
 {
   "name": "yom-auto-complete",
-  "version": "0.3.17",
+  "version": "0.3.18",
   "description": "An auto complete widget.",
   "keywords": [
     "auto complete"
   ],
+  "main": "dist/yom-auto-complete.js",
   "scripts": {
     "build": "./node_modules/rollup/bin/rollup -c"
   },

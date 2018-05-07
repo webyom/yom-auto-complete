@@ -314,52 +314,54 @@ var i18n = {
 	}
 };
 
-function yomCssModuleHelper(className, cssContent, moduleUri) {
-    var head = document.head || document.getElementsByTagName("head")[0];
-    var styleTagId = "yom-style-module-inject-tag";
-    var styleTag = document.getElementById(styleTagId);
-    if (!styleTag) {
-        styleTag = document.createElement("style");
-        styleTag.id = styleTagId;
-        styleTag.type = "text/css";
-        styleTag = head.appendChild(styleTag);
-    }
-    window._yom_style_module_injected = window._yom_style_module_injected || {};
-    if (!moduleUri) {
-        styleTag.appendChild(document.createTextNode(cssContent + "\n"));
-    } else if (!window._yom_style_module_injected[moduleUri]) {
-        styleTag.appendChild(document.createTextNode("/* " + moduleUri + " */\n" + cssContent + "\n"));
-        window._yom_style_module_injected[moduleUri] = 1;
-    }
-    function formatClassName(cn) {
-        return cn.replace(/^\s*&/, className).replace(/\s+&/g, " " + className).replace(/&/g, "");
-    }
-    function moduleClassNames() {
-        var cns = [];
-        var args = Array.prototype.slice.call(arguments);
-        if (!args.length) {
-            return className;
+(function(global) {
+    global.yomCssModuleHelper = global.yomCssModuleHelper || function(className, cssContent, moduleUri) {
+        var head = document.head || document.getElementsByTagName("head")[0];
+        var styleTagId = "yom-style-module-inject-tag";
+        var styleTag = document.getElementById(styleTagId);
+        if (!styleTag) {
+            styleTag = document.createElement("style");
+            styleTag.id = styleTagId;
+            styleTag.type = "text/css";
+            styleTag = head.appendChild(styleTag);
         }
-        args.forEach(function(cn) {
-            if (typeof cn == "object") {
-                Object.keys(cn).forEach(function(k) {
-                    if (cn[k]) {
-                        k = formatClassName(k);
-                        k && cns.push(k);
-                    }
-                });
-            } else {
-                cn = formatClassName(cn);
-                cn && cns.push(cn);
+        window._yom_style_module_injected = window._yom_style_module_injected || {};
+        if (!moduleUri) {
+            styleTag.appendChild(document.createTextNode(cssContent + "\n"));
+        } else if (!window._yom_style_module_injected[moduleUri]) {
+            styleTag.appendChild(document.createTextNode("/* " + moduleUri + " */\n" + cssContent + "\n"));
+            window._yom_style_module_injected[moduleUri] = 1;
+        }
+        function formatClassName(cn) {
+            return cn.replace(/^\s*&/, className).replace(/\s+&/g, " " + className).replace(/&/g, "");
+        }
+        function moduleClassNames() {
+            var cns = [];
+            var args = Array.prototype.slice.call(arguments);
+            if (!args.length) {
+                return className;
             }
-        });
-        return cns.join(" ");
-    }
-    return {
-        moduleClassNames: moduleClassNames,
-        cssContent: cssContent
+            args.forEach(function(cn) {
+                if (typeof cn == "object") {
+                    Object.keys(cn).forEach(function(k) {
+                        if (cn[k]) {
+                            k = formatClassName(k);
+                            k && cns.push(k);
+                        }
+                    });
+                } else {
+                    cn = formatClassName(cn);
+                    cn && cns.push(cn);
+                }
+            });
+            return cns.join(" ");
+        }
+        return {
+            moduleClassNames: moduleClassNames,
+            cssContent: cssContent
+        };
     };
-}
+})(typeof global == "undefined" ? self : global);
 
 var moduleUri = typeof module != "undefined" && module.uri;
 
@@ -488,10 +490,12 @@ $.extend(YomAutoComplete.prototype, {
 				var rmItems = this.removeSelectedItem(removeId);
 				var rmStdItems = this.getStdItem(rmItems);
 				var onRemove = this._opt.onRemove;
+				var onChange = this._opt.onChange;
 				if(this._checkbox) {
 					$('[data-id="' + removeId + '"] .auto-complete-mockup-checkbox', this._list).removeClass('on');
 				}
 				onRemove && onRemove.call(this._box[0], rmItems, rmStdItems);
+				onChange && onChange.call(this._box[0], this.getSelectedDataList());
 			} else {
 				$('.auto-complete-rich-item:last', this._richBox).addClass('active');
 			}
@@ -617,7 +621,9 @@ $.extend(YomAutoComplete.prototype, {
 					}
 					var rmStdItems = self.getStdItem(rmItems);
 					var onRemove = self._opt.onRemove;
+					var onChange = self._opt.onChange;
 					onRemove && onRemove.call(self._box[0], rmItems, rmStdItems);
+					onChange && onChange.call(self._box[0], self.getSelectedDataList());
 				}, 0);
 			});
 		}
@@ -795,6 +801,7 @@ $.extend(YomAutoComplete.prototype, {
 		var dataList = [];
 		var rmItems = [];
 		var onRemove = this._opt.onRemove;
+		var onChange = this._opt.onChange;
 		if(nameList.length) {
 			nameList[nameList.length - 1] = this._getToBeMatchedInput();
 		}
@@ -812,8 +819,9 @@ $.extend(YomAutoComplete.prototype, {
 			}
 		});
 		this._selectedData = dataList;
-		if(onRemove && rmItems.length) {
-			onRemove.call(this._box[0], rmItems);
+		if(rmItems.length) {
+			onRemove && onRemove.call(this._box[0], rmItems);
+			onChange && onChange.call(this._box[0], this.getSelectedDataList());
 		}
 	},
 
@@ -827,6 +835,7 @@ $.extend(YomAutoComplete.prototype, {
 		var item;
 		var hasSame = false;
 		var onRemove = this._opt.onRemove;
+		var onChange = this._opt.onChange;
 		if(this._selectedData.length >= this._maxSelection) {
 			if(this._maxSelection === 1) {
 				item = this._selectedData[0];
@@ -834,9 +843,8 @@ $.extend(YomAutoComplete.prototype, {
 					return false;
 				} else {
 					this._selectedData = [aItem];
-					if(onRemove) {
-						onRemove.call(this._box[0], [item]);
-					}
+					onRemove && onRemove.call(this._box[0], [item]);
+					onChange && onChange.call(this._box[0], this.getSelectedDataList());
 					return true;
 				}
 			} else {
@@ -956,6 +964,7 @@ $.extend(YomAutoComplete.prototype, {
 		var onBeforeSelect = this._opt.onBeforeSelect;
 		var onSelect = this._opt.onSelect;
 		var onRemove = this._opt.onRemove;
+		var onChange = this._opt.onChange;
 		var item, checkbox, added;
 		if(!(index >= 0 && this._currentListData && typeof this._currentListData[index] != 'undefined')) {
 			return;
@@ -970,6 +979,7 @@ $.extend(YomAutoComplete.prototype, {
 				this.removeSelectedItem(item);
 				checkbox.removeClass('on');
 				onRemove && onRemove.call(this._box[0], [item]);
+				onChange && onChange.call(this._box[0], this.getSelectedDataList());
 			} else {
 				if(!onBeforeSelect || onBeforeSelect.call(this._box[0], item, index) !== false) {
 					added = this._addItem(item);
@@ -982,6 +992,7 @@ $.extend(YomAutoComplete.prototype, {
 					if(added) {
 						checkbox.addClass('on');
 						onSelect && onSelect.call(this._box[0], item, index);
+						onChange && onChange.call(this._box[0], this.getSelectedDataList());
 					}
 				}
 			}
@@ -995,7 +1006,10 @@ $.extend(YomAutoComplete.prototype, {
 					this._syncFromDataList();
 				}
 				this.hideList();
-				added && onSelect && onSelect.call(this._box[0], item, index);
+				if(added) {
+					onSelect && onSelect.call(this._box[0], item, index);
+					onChange && onChange.call(this._box[0], this.getSelectedDataList());
+				}
 			}
 		}
 	},

@@ -99,6 +99,9 @@ $.extend(YomAutoComplete.prototype, {
 		this._toRefBlurHide = setTimeout(function() {
 			self._syncFromDataList();
 			self.hideList();
+			if(self._richSelectionResult) {
+				self._box.val('');
+			}
 		}, 500);
 		if(this._opt.onBlur) {
 			this._opt.onBlur.call(this._box[0], evt);
@@ -162,11 +165,9 @@ $.extend(YomAutoComplete.prototype, {
 		var boxValue = this._box.val();
 		var toBeMatchedInput;
 		clearTimeout(this._toRefMatch);
-		if(keyCode === 13) {//enter
-			if(this.isListShown()) {
-				evt.stopPropagation();
-				this._selectItem(this._currentListIndex);
-			}
+		if(keyCode === 13 && this.isListShown()) {//enter
+			evt.stopPropagation();
+			this._selectItem(this._currentListIndex);
 		} else if(keyCode === 27) {//esc
 			this.hideList();
 		} else if((keyCode === 8 || keyCode === 46 || keyCode === 88 && evt.ctrlKey) && !this._richSelectionResult && boxValue.split(new RegExp('\\s*' + this._getRegExpSeperator() + '\\s*')).length <= this._selectedData.length) {//backspace/delete/ctrl + x
@@ -175,11 +176,14 @@ $.extend(YomAutoComplete.prototype, {
 		} else if(!(keyCode >= 37 && keyCode <= 40) && keyCode !== 9/*tab*/ && keyCode !== 17/*ctrl*/ && !evt.ctrlKey) {
 			toBeMatchedInput = this._getToBeMatchedInput();
 			if(toBeMatchedInput && !this._opt.disableFilter) {
+				if(keyCode === 13) {//enter
+					evt.stopPropagation();
+				}
 				this._toRefMatch = setTimeout(function() {
-					self._getMatchedList(toBeMatchedInput, function(data) {
+					self._compositionMode || self._getMatchedList(toBeMatchedInput, function(data) {
 						self.renderList(data, {matchedInput: toBeMatchedInput});
 					});
-				}, 300);
+				}, 500);
 			} else {
 				if(!(keyCode === 8 || keyCode === 46) && !this._freeInput && this._separator && new RegExp(this._getRegExpSeperator() + '\\s*$').test(boxValue)) {
 					this._syncFromDataList();
@@ -226,7 +230,14 @@ $.extend(YomAutoComplete.prototype, {
 			.on('blur', this._bind.blur)
 			.on('keydown', this._bind.keydown)
 			.on('keypress', this._bind.keypress)
-			.on('keyup', this._bind.keyup);
+			.on('keyup', this._bind.keyup)
+			.on('compositionstart', function () {
+				self._compositionMode = true;
+				self.hideList(true);
+			})
+			.on('compositionend', function () {
+				self._compositionMode = false;
+			});
 		$('.dropdown-menu', this._list).on('scroll', this._bind.scroll);
 		this._list.delegate('li[data-index] a', 'click', function(evt) {
 			var aEl = evt.currentTarget;
@@ -785,10 +796,10 @@ $.extend(YomAutoComplete.prototype, {
 		return this;
 	},
 
-	hideList: function() {
+	hideList: function(noClearInput) {
 		if(this.isListShown() && (!this._opt.onBeforeHide || this._opt.onBeforeHide.call(this._box[0]) !== false)) {
 			this._renderList();
-			if(this._richSelectionResult) {
+			if(this._richSelectionResult && !noClearInput) {
 				this._box.val('');
 			}
 		}

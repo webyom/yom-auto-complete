@@ -395,6 +395,7 @@ var YomAutoComplete = function(box, opt) {
 	this._toRefMatch = null;
 	this._toRefFocus = null;
 	this._toRefBlurHide = null;
+	this._sequence = -1;//list render sequence
 	this._bind = {
 		clickDocument: function(evt) {return self._onClickDocument(evt);},
 		click: function(evt) {return self._onClick(evt);},
@@ -1035,6 +1036,13 @@ $.extend(YomAutoComplete.prototype, {
 
 	_renderList: function(dataList, opt) {
 		opt = opt || {};
+		if(opt.sequence) {
+			if(opt.sequence > this._sequence) {
+				this._sequence = opt.sequence;
+			} else {
+				return this;
+			}
+		}
 		var self = this;
 		var listTpl$$1 = opt.listTpl || this._listTpl;
 		var matchedInput = opt.matchedInput || '';

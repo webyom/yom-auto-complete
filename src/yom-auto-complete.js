@@ -111,7 +111,10 @@ $.extend(YomAutoComplete.prototype, {
 
 	_onKeydown: function(evt) {
 		var keyCode = evt.keyCode;
-		if(keyCode === 40 && this._currentListData) {//down
+		if(keyCode === 13 && this.isListShown()) {//enter
+			evt.stopPropagation();
+			this._selectItem(this._currentListIndex);
+		} else if(keyCode === 40 && this._currentListData) {//down
 			var index = (this._currentListIndex + 1) % this._currentListData.length;
 			this._highlightItem(index);
 			if($('.dropdown-menu', this._list).css('overflow-y') == 'scroll') {
@@ -151,9 +154,9 @@ $.extend(YomAutoComplete.prototype, {
 
 	_onKeypress: function(evt) {
 		var keyCode = evt.keyCode;
-		if(keyCode === 13) {//enter
+		if(keyCode === 13 && this.isListShown()) {//enter
 			evt.preventDefault();
-			this.isListShown() && evt.stopPropagation();
+			evt.stopPropagation();
 		}
 	},
 
@@ -168,7 +171,6 @@ $.extend(YomAutoComplete.prototype, {
 		clearTimeout(this._toRefMatch);
 		if(keyCode === 13 && this.isListShown()) {//enter
 			evt.stopPropagation();
-			this._selectItem(this._currentListIndex);
 		} else if(keyCode === 27) {//esc
 			this.hideList();
 		} else if((keyCode === 8 || keyCode === 46 || keyCode === 88 && evt.ctrlKey) && !this._richSelectionResult && boxValue.split(new RegExp('\\s*' + this._getRegExpSeperator() + '\\s*')).length <= this._selectedData.length) {//backspace/delete/ctrl + x
@@ -656,7 +658,9 @@ $.extend(YomAutoComplete.prototype, {
 				} else {
 					this._syncFromDataList();
 				}
-				this.hideList();
+				setTimeout(function() {
+					self.hideList();
+				}, 100);
 				if(added) {
 					onSelect && onSelect.call(this._box[0], item, index);
 					onChange && onChange.call(this._box[0], this.getSelectedDataList());

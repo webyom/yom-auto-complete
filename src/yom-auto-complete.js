@@ -43,6 +43,7 @@ var YomAutoComplete = function(box, opt) {
 		keydown: function(evt) {return self._onKeydown(evt);},
 		keypress: function(evt) {return self._onKeypress(evt);},
 		keyup: function(evt) {return self._onKeyup(evt);},
+		paste: function(evt) {return self._onPaste(evt);},
 		scroll: function(evt) {return self._onScroll(evt);}
 	};
 	this.setDataSource(opt.dataSource);
@@ -209,6 +210,18 @@ $.extend(YomAutoComplete.prototype, {
 		}
 	},
 
+	_onPaste: function(evt) {
+		var self = this;
+		this._toRefMatch = setTimeout(function() {
+			var toBeMatchedInput = self._getToBeMatchedInput();
+			if(toBeMatchedInput && !self._opt.disableFilter) {
+				self._compositionMode || self._getMatchedList(toBeMatchedInput, function(data) {
+					self.renderList(data, {matchedInput: toBeMatchedInput});
+				});
+			}
+		}, 500);
+	},
+
 	_onScroll: function(evt) {
 		clearTimeout(this._toRefBlurHide);
 	},
@@ -234,6 +247,7 @@ $.extend(YomAutoComplete.prototype, {
 			.on('keydown', this._bind.keydown)
 			.on('keypress', this._bind.keypress)
 			.on('keyup', this._bind.keyup)
+			.on('paste', this._bind.paste)
 			.on('compositionstart', function () {
 				self._compositionMode = true;
 				self.hideList(true);
@@ -290,7 +304,8 @@ $.extend(YomAutoComplete.prototype, {
 			.off('blur', this._bind.blur)
 			.off('keydown', this._bind.keydown)
 			.off('keypress', this._bind.keypress)
-			.off('keyup', this._bind.keyup);
+			.off('keyup', this._bind.keyup)
+			.off('paste', this._bind.paste);
 		$('.dropdown-menu', this._list).off('scroll', this._bind.scroll);
 		this._list.undelegate();
 		if(this._richBox) {
